@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Login</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="/static/css/styles.css">
+        <link rel="stylesheet" href="/static/css/login.css">
+        <link rel="icon" href="/static/svg/color-filter.svg" type="image/x-icon">
+    </head>
+    <body>
+        <div class="login">
+            <form name="login" method="post">
+                <div class="mb-4">
+                  <!-- <label for="email">Email</label>
+                  <input id="email" type="email" class="input" placeholder="Inserisci la tua email"> -->
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required class="input" placeholder="Inserisci il tuo username">
+                </div>
+                <div class="mb-6">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" name="password" required class="input" placeholder="Inserisci la tua password">
+                </div>
+                <button type="submit" class="login-U">Login</button>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <ul>
+                            {% for message in messages %}
+                                <li class="text-white">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                {% endwith %}
+            </form>
+        </div>
+    </body>
+</html>
+
