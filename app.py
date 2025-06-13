@@ -17,6 +17,6 @@ def hello_world():
 @login_required
 def user():
     if current_user.is_authenticated:
-        return f"<p>Welcome, {current_user.username}!</p>"
+        return f"<p>Welcome, {current_user.username}! {current_user.role}</p>"
     else:
         return "<p>You are not logged in.</p>"

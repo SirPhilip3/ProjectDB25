@@ -2,7 +2,7 @@ from flask_login import *
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template, request, redirect, url_for, flash , Blueprint
 from database import db, app 
-from model import User
+from model import Passenger, Airlines, User
 import uuid
 
 auth = Blueprint('auth', __name__)
@@ -25,7 +25,7 @@ def login ():
         if user and check_password_hash(user.password, password):
             login_user(user)
             flash('Login successful!')
-            return redirect(url_for('feed'))
+            return redirect(url_for('user'))  
         else:
             flash('Invalid username or password')
             return redirect(url_for('login'))
@@ -34,12 +34,14 @@ def login ():
 @app.route("/register" , methods=['GET', 'POST'])
 def register ():
     if request.method == 'POST':
-        username = request.form['username']
-        email = request.form['email']
-        password = request.form['password']
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        type = request.form.get('role')
+        role = True if type == 'true' else False
+
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        
-        new_user = User(username=username, email=email, password=hashed_password)
+        new_user = User(username=username, role=role, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         

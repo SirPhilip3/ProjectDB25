@@ -6,9 +6,6 @@
         <title>Register</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <script src="https://cdn.tailwindcss.com"></script>
-        <link rel="stylesheet" href="/static/css/styles.css">
-        <link rel="stylesheet" href="/static/css/login.css">
-        <link rel="icon" href="/static/svg/color-filter.svg" type="image/x-icon">
     </head>
     <body>
         <div class="login">
@@ -25,8 +22,11 @@
                     <label for="password">Password</label>
                     <input id="password" type="password" name="password" class="input" required placeholder="Inserisci la tua password">
                 </div>
-                <button type="submit" class="login-U">Register as User</button>
-                <!-- <button type="submit" class="login-A">Register as Advertizer</button> -->
+                <div>
+                    <input type="checkbox" id="role" name="role" value="true">
+                    <label for="role">I am an airline</label><br>
+                </div>
+                <button type="submit" class="login-U">Register</button>
             </form>
         </div>
     </body>
