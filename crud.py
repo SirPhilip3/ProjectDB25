@@ -26,30 +26,25 @@ def search_flight(departure, arrival, direct_flight, class_type):
     if direct_flight:
         result = db.session.query(Flight.departure_airport, Flight.destination_airport).filter(
             Flight.departure_airport == departure, Flight.destination_airport == arrival).all()
-
-        result = []
-        match class_type:
-            case "Economy":
-                result.append((dep, dest, class_type))
-            case "Business":
-                a=1
-            case "First Class":
-                a=1
     else:
         F1 = aliased(Flight)
         F2 = aliased(Flight)
-
-        rows = db.session.query(F1, F2).filter(
+        rows = db.session.query(F1.departure_airport, F1.destination_airport).filter(
             F1.departure_airport == departure,
             F1.destination_airport == F2.departure_airport,
-            F2.destination_airport == arrival,
-            F1.class_type == class_type,
-            F2.class_type == class_type
+            F2.destination_airport == arrival
             ).all()
         
-        result = []
-        for dep, dest in rows:
-            result.append((dep, dest, class_type))
+    result = []
+    for dep, dest in rows:
+        result.append((dep, dest, class_type))
+    match class_type:
+        case "Economy":
+            result.departure_airport
+        case "Business":
+            a=1
+        case "First Class":
+            a=1
 
     return result
 
