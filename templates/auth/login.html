@@ -9,10 +9,8 @@
     </head>
     <body>
         <div class="login">
-            <form name="login" method="post">
+            <form name="login" method="post" action="">
                 <div class="mb-4">
-                  <!-- <label for="email">Email</label>
-                  <input id="email" type="email" class="input" placeholder="Inserisci la tua email"> -->
                     <label for="username">Username:</label>
                     <input type="text" id="username" name="username" required class="input" placeholder="Inserisci il tuo username">
                 </div>
@@ -21,15 +19,6 @@
                     <input id="password" type="password" name="password" required class="input" placeholder="Inserisci la tua password">
                 </div>
                 <button type="submit" class="login-U">Login</button>
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                        <ul>
-                            {% for message in messages %}
-                                <li class="text-white">{{ message }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                {% endwith %}
             </form>
         </div>
     </body>

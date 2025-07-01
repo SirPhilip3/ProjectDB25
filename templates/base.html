@@ -8,7 +8,52 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        
+        <div class="select-flight">
+            <form name="flight" method="post" action="">
+                <div class="mb-4">
+                    <label for="username">From:</label>
+                    <input type="text" id="start_airport" name="from" required class="input" placeholder="Da dove vuoi partire?">
+                </div>
+                <div class="mb-6">
+                    <label for="password">To:</label>
+                    <input type="text" id="end_airport" name="to" required class="input" placeholder="Dove vuoi andare?">
+                </div>
+                <div>
+                    <label>Filters</label>
+                    <div class="flex items-center mb-4">
+                        <input type="checkbox" id="direct_flight" name="direct_flight" class="mr-2">
+                        <label for="direct_flight">Direct Flight</label>
+                    </div>
+                    <div class="mb-6">
+                        <label for="class">Class:</label>
+                        <select id="class" name="flight_class" required class="input">
+                            <option value="economy">Economy</option>
+                            <option value="business">Business</option>
+                            <option value="first">First Class</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+        </div>
+        <div class="flight-results">
+            {% if flights %}
+                <h2>Available Flights</h2>
+                <ul>
+                    {% for flight in flights %}
+                        <li>
+                            Departure: {{ flight.departure_time }}<br>
+                            Arrival: {{ flight.arrival_time }}<br>
+                            Price: ${{ flight.price }}<br>
+                            <!-- Button che redirecta a /flight/flight_id=id per avere i dettagli del volo-->
+                            <button class="btn-simple" onclick="window.location.href='{{ url_for('flight' , flight_id = flight.id) }}'">SELECT</button> 
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No flights available for the selected route.</p>
+            {% endif %}
+        </div>
     </body>
 </html>
 

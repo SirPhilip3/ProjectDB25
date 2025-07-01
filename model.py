@@ -1,83 +1,138 @@
+import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float
+from sqlalchemy.orm import Mapped, mapped_column , relationship
+from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime
 from database import db
 import uuid
 
- # usiamo stesso UserMixin per tutti gli utenti, sia airline che passenger
- # diffenrenziamo per fare le query attraverso il campo boolean is_airline 
+# usiamo stesso UserMixin per tutti gli utenti, sia airline che passenger
+# diffenrenziamo per fare le query attraverso il campo boolean role 
+
+# Usiamo un Enum per i ruoli, è più pulito e manutenibile
+class UserRole(enum.Enum):
+    PASSENGER = 'passenger'
+    AIRLINE = 'airline'
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
+    
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    username: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False) # La password dovrebbe essere più lunga per l'hash
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
 
-    id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    username : Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
-    # per fare differenza tra airline e passenger usiamo campo boolean
-    role : Mapped[bool] = mapped_column(default=None, nullable=False) 
-    password : Mapped[str] = mapped_column(nullable=False)
+    # Relazione: se l'utente è una compagnia, avrà un profilo airline associato
+    airline_profile: Mapped["Airline"] = relationship(back_populates="user", cascade="all, delete-orphan")
+    # Relazione: se l'utente è un passeggero, avrà delle prenotazioni
+    bookings: Mapped[list["Booking"]] = relationship(back_populates="passenger")
 
     def __repr__(self):
-        return f"<User {self.username} Type {self.role} Password {self.password}>"
-    
-class Airlines(UserMixin, db.Model):
+        return f"<User {self.username} (Role: {self.role.value})>"
+
+class Airline(db.Model):
     __tablename__ = 'airlines'
-
-    id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name : Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
-    revenue : Mapped[str] = mapped_column(String(150), unique=False, nullable=True)
+    
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
+    
+    # Chiave esterna per collegare la compagnia all'utente che la gestisce
+    user_id: Mapped[str] = mapped_column(ForeignKey('users.id'), unique=True)
+    
+    # Relazioni
+    user: Mapped["User"] = relationship(back_populates="airline_profile")
+    flights: Mapped[list["Flight"]] = relationship(back_populates="airline")
+    airplanes: Mapped[list["Airplane"]] = relationship(back_populates="airline")
 
     def __repr__(self):
-        return f"<Airline {self.name} Revenue {self.revenue}>"
-    
-class Passenger(UserMixin, db.Model):
-    __tablename__ = 'passengers'
+        return f"<Airline {self.name}>"
 
-    id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    username : Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
-
-    def __repr__(self):
-        return f"<User {self.username}>"
-    
-class Flight(db.Model):
-    __tablename__ = 'flights'
-
-    id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    departure : Mapped[str] = mapped_column(String(150), nullable=False)
-    arrival : Mapped[str] = mapped_column(String(150), nullable=False)
-    airline_id : Mapped[str] = mapped_column(String(36), ForeignKey('airlines.id'), nullable=False)
-    airplane_id : Mapped[str] = mapped_column(String(36), ForeignKey('airplanes.id'), nullable=False)
-    
-    economy_price : Mapped[float] = mapped_column(Float, nullable=False)
-    business_price : Mapped[float] = mapped_column(Float, nullable=False)
-    first_class_price : Mapped[float] = mapped_column(Float, nullable=False)
-
-    def __repr__(self):
-        return f"<Departure {self.departure} Arrival {self.arrival}>"
-    
 class Airplane(db.Model):
     __tablename__ = 'airplanes'
 
     id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     model : Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
+    #! maybe useless
     capacity : Mapped[int] = mapped_column(Integer, nullable=False)
-    economy_seats : Mapped[int] = mapped_column(Integer, nullable=False)
-    business_seats : Mapped[int] = mapped_column(Integer, nullable=False)
-    first_class_seats : Mapped[int] = mapped_column(Integer, nullable=False)
+    # seat types
+    economy_seats: Mapped[int] = mapped_column(Integer, nullable=False)
+    business_seats: Mapped[int] = mapped_column(Integer, nullable=False)
+    first_class_seats: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    #! check total capacity < sum of all seats
+    
     airline_id : Mapped[str] = mapped_column(String(36), ForeignKey('airlines.id'), nullable=False)
 
     def __repr__(self):
         return f"<Airplane {self.model} Capacity {self.capacity}>"
 
-class Ticket(db.Model):
-    __tablename__ = 'tickets'
-
-    id : Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    flight_id : Mapped[str] = mapped_column(String(36), ForeignKey('flights.id'), nullable=False)
-    passenger_id : Mapped[str] = mapped_column(String(36), ForeignKey('passengers.id'), nullable=False)
-    seat_number : Mapped[str] = mapped_column(String(10), nullable=False)
-    class_type : Mapped[str] = mapped_column(String(20), nullable=False) 
+class Airport(db.Model):
+    __tablename__ = 'airports'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(150), nullable=False)
+    city: Mapped[str] = mapped_column(String(150), nullable=False)
+    iata_code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False) # es. "FCO" per Fiumicino
 
     def __repr__(self):
-        return f"<Ticket Flight {self.flight_id} Passenger {self.passenger_id} Seat {self.seat_number}>"
+        return f"<Airport {self.name} ({self.iata_code})>"
 
+class Flight(db.Model):
+    __tablename__ = 'flights'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    departure_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    arrival_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    
+    # Prezzi base per classe
+    economy_price: Mapped[float] = mapped_column(Float, nullable=False)
+    business_price: Mapped[float] = mapped_column(Float, nullable=False)
+    first_class_price: Mapped[float] = mapped_column(Float, nullable=False)
+    
+    # Chiavi esterne
+    airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
+    departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
+    destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
+    airplane_id: Mapped[str] = mapped_column(ForeignKey('airplanes.id'), nullable=False)
+    
+    # Relazioni
+    airline: Mapped["Airline"] = relationship(back_populates="flights")
+    departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
+    destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight")
+
+    def __repr__(self):
+        return f"<Flight {self.id} from {self.departure_airport.iata_code} to {self.destination_airport.iata_code}>"
+
+
+#! for now not used 
+class Booking(db.Model):
+    __tablename__ = 'bookings'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    booking_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False, default=db.func.now())
+    total_cost: Mapped[float] = mapped_column(Float, nullable=False)
+    
+    # Chiave esterna per il passeggero che ha fatto la prenotazione
+    passenger_id: Mapped[str] = mapped_column(ForeignKey('users.id'), nullable=False)
+    
+    # Relazioni
+    passenger: Mapped["User"] = relationship(back_populates="bookings")
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
+
+class Ticket(db.Model):
+    __tablename__ = 'tickets'
+    
+    id: Mapped[int] = mapped_column(primary_key=True)
+    seat_number: Mapped[str] = mapped_column(String(10), nullable=False)
+    ticket_class: Mapped[str] = mapped_column(String(20), nullable=False) # 'economy', 'business', 'first'
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    # extras (es. bagaglio extra) potrebbe essere un campo JSON o una tabella separata
+    
+    # Chiavi esterne
+    flight_id: Mapped[int] = mapped_column(ForeignKey('flights.id'), nullable=False)
+    booking_id: Mapped[int] = mapped_column(ForeignKey('bookings.id'), nullable=False)
+    
+    # Relazioni
+    flight: Mapped["Flight"] = relationship(back_populates="tickets")
+    booking: Mapped["Booking"] = relationship(back_populates="tickets")

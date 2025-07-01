@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Flight Detail</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <form action="buy_ticket" method="post">
+            <!-- id per trovare il volo da linkare al biglietto-->
+            <input type="hidden" name="flight_id" value="{{ flight.id }}">
+            <button type="submit">Buy</button>
+        </form>
+    </body>
+</html>
