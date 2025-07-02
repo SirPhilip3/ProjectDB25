@@ -1,14 +1,59 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset='utf-8'>
-        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-        <title>Flight Detail</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body>
-        <button onclick="window.">ADD</button>
 
-    </body>
+<html>
+{%extends "base.html" %}
+<head>
+  <title>Add Flight</title>
+</head>
+<body>
+  <form action="/add_flight" method="post">
+    <label>From: <input type="text" name="from"></label><br>
+    <label>To: <input type="text" name="to"></label><br>
+    <label>Orario Partenza: <input type="time" name="departure_time"></label><br>
+    <label>Orario Arrivo: <input type="time" name="arrival_time"></label><br>
+
+    <h4>Posti Disponibili</h4>
+    <label>Economy: <input type="number" name="seats_economy"></label><br>
+    <label>Business: <input type="number" name="seats_business"></label><br>
+    <label>First: <input type="number" name="seats_first"></label><br>
+
+    <h4>Costo Posti</h4>
+    <label>Economy: <input type="number" name="price_economy"></label><br>
+    <label>Business: <input type="number" name="price_business"></label><br>
+    <label>First: <input type="number" name="price_first"></label><br>
+
+    <h4>Extra</h4>
+    <div id="extra-fields">
+      <input type="text" name="extra_name_1" placeholder="Extra Name">
+      <input type="number" name="extra_price_1" placeholder="Extra Price">
+    </div>
+    <button type="button" onclick="addExtra()">Add New</button>
+
+    <h4>Aereo assegnato</h4>
+    <select name="airplane_id">
+      {% for airplane in airplanes %}
+        <option value="{{ airplane.id }}">{{ airplane.name }}</option>
+      {% endfor %}
+    </select>
+
+    <br><br>
+    <input type="submit" value="Add">
+  </form>
+
+
+
+   <!-- DA TESTARE  -->
+  <script>
+    let extraCount = 1;
+    function addExtra() {
+      extraCount++;
+      const div = document.getElementById('extra-fields');
+      const html = `
+        <br>
+        <input type="text" name="extra_name_${extraCount}" placeholder="Extra Name">
+        <input type="number" name="extra_price_${extraCount}" placeholder="Extra Price">
+      `;
+      div.insertAdjacentHTML('beforeend', html);
+    }
+  </script>
+</body>
 </html>

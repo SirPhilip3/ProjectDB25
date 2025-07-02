@@ -8,6 +8,9 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
+        <!-- dettagli per il volo selezionato -->
+
+        <!-- Bottone finale per comprare il biglietto (triggera book_ticket()) -->
         <form action="buy_ticket" method="post">
             <!-- id per trovare il volo da linkare al biglietto-->
             <input type="hidden" name="flight_id" value="{{ flight.id }}">

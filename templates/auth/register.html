@@ -14,10 +14,6 @@
                     <label for="email">Email</label>
                     <input id="email" type="email" name="email" class="input" required placeholder="Inserisci la tua email">
                 </div>
-                <div class="mb-6">
-                    <label for="username">Username</label>
-                    <input id="username" type="username" name="username" class="input" required placeholder="Inserisci il tuo username">
-                </div>
                 <div class="mb-8">
                     <label for="password">Password</label>
                     <input id="password" type="password" name="password" class="input" required placeholder="Inserisci la tua password">
@@ -26,9 +22,23 @@
                     <input type="checkbox" id="role" name="role" value="true">
                     <label for="role">I am an airline</label><br>
                 </div>
+                <div id="airline-field" style="display: none;">
+                    <label for="airline_name">Airline Name</label>
+                    <input type="text" id="airline_name" name="airline_name" class="input" placeholder="Enter airline name">
+                </div>
                 <button type="submit" class="login-U">Register</button>
             </form>
         </div>
     </body>
 </html>
-
+<!-- js per far comparire il campo airline name se tick su I am an airline -->
+<script>
+document.getElementById('role').addEventListener('change', function() {
+    const airlineField = document.getElementById('airline-field');
+    if (this.checked) {
+        airlineField.style.display = 'block';
+    } else {
+        airlineField.style.display = 'none';
+    }
+});
+</script>

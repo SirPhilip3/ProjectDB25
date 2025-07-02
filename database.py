@@ -8,3 +8,5 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql+psycopg2://postgres:1234@loc
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
 
 db = SQLAlchemy(app)
+
+#! codice per configurare il database

@@ -20,10 +20,35 @@
                 </div>
                 <div>
                     <label>Filters</label>
+                    <!-- se ha una sosta intermedia o no -->
                     <div class="flex items-center mb-4">
                         <input type="checkbox" id="direct_flight" name="direct_flight" class="mr-2">
                         <label for="direct_flight">Direct Flight</label>
                     </div>
+
+                    <!-- range di prezzo -->
+                    <div class="mb-4">
+                        <label>Price Range:</label>
+                        <div class="flex gap-2">
+                            <input type="number" name="min_price" placeholder="Min €" class="input">
+                            <input type="number" name="max_price" placeholder="Max €" class="input">
+                        </div>
+                    </div>
+
+                    <!-- sort by's -->
+                    <div class="mb-4">
+                        <label for="sort_by">Sort by:</label>
+                        <select id="sort_by" name="sort_by" class="input">
+                            <option value="">No sorting</option>
+                            <option value="price_asc">Price: Low to High</option>
+                            <option value="price_desc">Price: High to Low</option>
+                            <option value="departure_asc">Departure: Early to Late</option>
+                            <option value="departure_desc">Departure: Late to Early</option>
+                            <option value="duration_asc">Duration: Short to Long</option>
+                        </select>
+                    </div>
+
+                    <!-- DA RIVEDERE SE NECESSARIO -->
                     <div class="mb-6">
                         <label for="class">Class:</label>
                         <select id="class" name="flight_class" required class="input">

@@ -2,7 +2,7 @@ from flask_login import *
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Flask, render_template, request, redirect, url_for, flash , Blueprint
 from database import db, app 
-from model import User, UserRole
+from model import User, UserRole, Airline
 import uuid
 
 auth = Blueprint('auth', __name__)
@@ -18,9 +18,10 @@ def load_user(user_id):
 @app.route ("/login" , methods=['GET', 'POST'])
 def login ():
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
-        user = User.query.filter_by(username=username).first()
+        #? first da riguardare
+        user = User.query.filter_by(username=email).first()
         
         if user and check_password_hash(user.password, password):
             login_user(user)
@@ -44,14 +45,17 @@ def login ():
 @app.route("/register" , methods=['GET', 'POST'])
 def register ():
     if request.method == 'POST':
-        username = request.form.get('username')
+        mail = request.form.get('email')
         password = request.form.get('password')
 
         type = request.form.get('role')
         role = UserRole.AIRLINE if type == 'true' else UserRole.PASSENGER
 
+        # se l'utente è un airline, richiedi anche il nome della compagnia aerea
+        airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
+
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(username=username, role=role, password=hashed_password)
+        new_user = User(mail=mail, role=role, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 

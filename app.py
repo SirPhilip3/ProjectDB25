@@ -24,6 +24,7 @@ def hello_world():
     return render_template("base.html", flights=flights)
 
 # get information about the user (flights tikets etcc)
+#! maybe inutile
 @app.route("/user")
 @login_required
 def user():
@@ -47,11 +48,29 @@ def flight_details(flight_id):
     
     return render_template('flight_details.html', flight=flight_details)
 
+# information about the airline
 @app.route("/airline")
 @login_required
 def airline_profile():
+    #! maybe fare una funzione a parte per questo check
     if current_user.role == 'airline':
         # mostra il profilo della compagnia aerea
-        return f"<p>Welcome to your airline profile, {current_user.username}!</p>"
+        return render_template('airline_profile.html')
+    else:
+        return "<p>You are not authorized to view this page.</p>"
+
+@app.route("/add_flight", methods=['GET', 'POST'])
+@login_required
+def add_flight():
+    if current_user.role == 'airline':
+      return render_template('add_flight.html')
+    else:
+        return "<p>You are not authorized to view this page.</p>"
+    
+@app.route("/add_airplane", methods=['GET', 'POST'])
+@login_required
+def add_airplane():
+    if current_user.role == 'airline':
+      return render_template('add_airplane.html')
     else:
         return "<p>You are not authorized to view this page.</p>"

@@ -18,7 +18,8 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    username: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
+    #! potrebbe essere ridondante userame e name se user è una compagnia aerea
+    email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False) # La password dovrebbe essere più lunga per l'hash
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
 
@@ -105,20 +106,20 @@ class Flight(db.Model):
         return f"<Flight {self.id} from {self.departure_airport.iata_code} to {self.destination_airport.iata_code}>"
 
 
-#! for now not used 
-class Booking(db.Model):
-    __tablename__ = 'bookings'
+#! INUTILE
+# class Booking(db.Model):
+#     __tablename__ = 'bookings'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    booking_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False, default=db.func.now())
-    total_cost: Mapped[float] = mapped_column(Float, nullable=False)
+#     id: Mapped[int] = mapped_column(primary_key=True)
+#     booking_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False, default=db.func.now())
+#     total_cost: Mapped[float] = mapped_column(Float, nullable=False)
     
-    # Chiave esterna per il passeggero che ha fatto la prenotazione
-    passenger_id: Mapped[str] = mapped_column(ForeignKey('users.id'), nullable=False)
+#     # Chiave esterna per il passeggero che ha fatto la prenotazione
+
     
-    # Relazioni
-    passenger: Mapped["User"] = relationship(back_populates="bookings")
-    tickets: Mapped[list["Ticket"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
+#     # Relazioni
+#     passenger: Mapped["User"] = relationship(back_populates="bookings")
+#     tickets: Mapped[list["Ticket"]] = relationship(back_populates="booking", cascade="all, delete-orphan")
 
 class Ticket(db.Model):
     __tablename__ = 'tickets'
@@ -129,10 +130,9 @@ class Ticket(db.Model):
     price: Mapped[float] = mapped_column(Float, nullable=False)
     # extras (es. bagaglio extra) potrebbe essere un campo JSON o una tabella separata
     
+    passenger_id: Mapped[str] = mapped_column(ForeignKey('users.id'), nullable=False)
     # Chiavi esterne
     flight_id: Mapped[int] = mapped_column(ForeignKey('flights.id'), nullable=False)
-    booking_id: Mapped[int] = mapped_column(ForeignKey('bookings.id'), nullable=False)
     
     # Relazioni
     flight: Mapped["Flight"] = relationship(back_populates="tickets")
-    booking: Mapped["Booking"] = relationship(back_populates="tickets")
