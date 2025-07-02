@@ -24,28 +24,36 @@ def add_airplane() :
 # departure_time , arrival_time, price ( price depends on class_type ) 
 def search_flight(departure, arrival, direct_flight, class_type):
     if direct_flight:
-        result = db.session.query(Flight.departure_airport, Flight.destination_airport).filter(
-            Flight.departure_airport == departure, Flight.destination_airport == arrival).all()
+        rows = db.session.query(Flight.departure_airport, 
+                                Flight.destination_airport, 
+                                Flight.economy_price, 
+                                Flight.business_price, 
+                                Flight.first_class_price).filter(
+                                    Flight.departure_airport == departure, 
+                                    Flight.destination_airport == arrival).all()
     else:
         F1 = aliased(Flight)
         F2 = aliased(Flight)
-        rows = db.session.query(F1.departure_airport, F1.destination_airport).filter(
-            F1.departure_airport == departure,
-            F1.destination_airport == F2.departure_airport,
-            F2.destination_airport == arrival
-            ).all()
+        rows = db.session.query(F1.departure_airport, 
+                                F1.destination_airport, 
+                                F1.economy_price, 
+                                F1.business_price, 
+                                F1.first_class_price).filter(
+                                    F1.departure_airport == departure,
+                                    F1.destination_airport == F2.departure_airport,
+                                    F2.destination_airport == arrival).all()
         
     result = []
-    for dep, dest in rows:
-        result.append((dep, dest, class_type))
     match class_type:
         case "Economy":
-            result.departure_airport
+            for dep, dest, e_price, b_price, f_price in rows:
+                result.append((dep, dest, e_price))
         case "Business":
-            a=1
+            for dep, dest, e_price, b_price, f_price in rows:
+                result.append((dep, dest, b_price))
         case "First Class":
-            a=1
-
+            for dep, dest, e_price, b_price, f_price in rows:
+                result.append((dep, dest, f_price))
     return result
 
 

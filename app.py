@@ -31,7 +31,6 @@ def user():
         return f"<p>Welcome, {current_user.username}! {current_user.role}</p>"
     else:
         return "<p>You are not logged in.</p>"
-    
 
 @app.route("/flight/<int:flight_id>")
 def flight_details(flight_id):
