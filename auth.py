@@ -21,7 +21,7 @@ def login ():
         email = request.form['email']
         password = request.form['password']
         #? first da riguardare
-        user = User.query.filter_by(username=email).first()
+        user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
             login_user(user)
@@ -55,7 +55,7 @@ def register ():
         airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(mail=mail, role=role, password=hashed_password)
+        new_user = User(email=mail, role=role, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -67,8 +67,10 @@ def register ():
                 flash('Airline name already exists.')
                 return redirect(url_for('register'))
             
-            new_airline = Airline(name=airline_name)
+            new_airline = Airline(name=airline_name, user_id=new_user.id)
             new_user.airline_profile = new_airline
+            db.session.add(new_airline)
+            db.session.commit()
         
         flash('Registration successful! Please log in.')
         return redirect(url_for('login'))
@@ -80,3 +82,11 @@ def logout():
     logout_user()
     # flash('Logged out successfully.')
     return redirect(url_for('hello_world'))
+
+
+
+
+
+
+
+

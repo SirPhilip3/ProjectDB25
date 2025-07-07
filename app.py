@@ -4,6 +4,9 @@ from flask_sqlalchemy import SQLAlchemy
 from auth import auth
 from database import db , app
 from crud import *
+from crud import book_ticket
+from model import UserRole
+from datetime import datetime, date
 
 with app.app_context():
     db.create_all()
@@ -53,7 +56,7 @@ def flight_details(flight_id):
 @login_required
 def airline_profile():
     #! maybe fare una funzione a parte per questo check
-    if current_user.role == 'airline':
+    if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
         return render_template('airline_profile.html')
     else:
@@ -61,16 +64,87 @@ def airline_profile():
 
 @app.route("/add_flight", methods=['GET', 'POST'])
 @login_required
-def add_flight():
-    if current_user.role == 'airline':
-      return render_template('add_flight.html')
+def add_flight_page():
+    if current_user.role == UserRole.AIRLINE:
+
+        if request.method == 'POST':
+            #! per ora gli aereoporti sono strighe
+            departure_airport = request.form['from']
+            arrival_airport = request.form['to']
+
+            departure_time = request.form['departure_time']
+            arrival_time = request.form['arrival_time']
+            #! meglio usare un datetime picker per evitare errori di formato
+            # To convert date and time strings to datetime objects, we can use the datetime module
+            flight_date = date.today() 
+            
+            # Create datetime objects
+            departure_time = datetime.combine(flight_date, datetime.strptime(departure_time, '%H:%M').time())
+            arrival_time = datetime.combine(flight_date, datetime.strptime(arrival_time, '%H:%M').time())
+            
+            economy_price = float(request.form['price_economy'])
+            business_price = float(request.form['price_business'])
+            first_class_price = float(request.form['price_first'])
+
+            airplane_id = request.form['airplane_id'] 
+            #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
+            add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price)
+    
+        airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
+        
+        return render_template('add_flight.html', airplanes=airplanes)
     else:
         return "<p>You are not authorized to view this page.</p>"
     
 @app.route("/add_airplane", methods=['GET', 'POST'])
 @login_required
-def add_airplane():
-    if current_user.role == 'airline':
-      return render_template('add_airplane.html')
+def add_airplane_page():
+    if current_user.role == UserRole.AIRLINE:
+        if request.method == 'POST':
+            model = request.form['model']
+            capacity = int(request.form['capacity'])
+            seats_economy = int(request.form['seats_economy'])
+            seats_business = int(request.form['seats_business'])
+            seats_first = int(request.form['seats_first'])
+            # se è airline ha airline_profile e il suo id , altrimenti current_user.id è l'id dell'utente (cose diverse)
+            add_airplane(model, capacity, seats_economy, seats_business, seats_first, current_user.airline_profile.id)
+        return render_template('add_airplane.html')
     else:
         return "<p>You are not authorized to view this page.</p>"
+    
+
+
+
+#ticket/booking route
+
+
+
+@app.route('/tickets', methods=['GET', 'POST'])
+@login_required
+def tickets():
+    if request.method == 'POST':
+        flight_id = request.form.get('flight_id')
+        ticket_class = request.form.get('ticket_class')
+        seat_number = request.form.get('seat_number')
+      
+
+        if current_user.role != UserRole.PASSENGER:
+            flash('Only passengers can book tickets.', 'error')
+            return redirect(url_for('hello_world'))
+
+        ticket, message = book_ticket(
+            flight_id=flight_id,
+            passenger_id=current_user.id,
+            ticket_class=ticket_class,
+            seat_number=seat_number,
+            
+        )
+
+        if ticket:
+            flash('Ticket booked successfully!', 'success')
+            return redirect(url_for('tickets'))
+        else:
+            flash(f'Booking failed: {message}', 'error')
+            return redirect(url_for('tickets'))
+
+    return render_template('tickets.html')  

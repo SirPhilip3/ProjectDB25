@@ -1,15 +1,17 @@
 # crud operations for the database
 from database import db
-from model import User , Flight, Airplane, Airlines, Passenger, Ticket
+from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased
 
 # Aggiunge una tratta al database
-def add_flight(airline_id, airplane_id, departure, arrival, economy_price, business_price, first_class_price):
+def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,departure_time, arrival_time, economy_price, business_price, first_class_price):
     new_flight = Flight(
         airline_id=airline_id,
         airplane_id=airplane_id,
-        departure=departure,
-        arrival=arrival,
+        departure_airport=departure_airport,
+        destination_airport=arrival_airport,
+        departure_time=departure_time,
+        arrival_time=arrival_time,
         economy_price=economy_price,
         business_price=business_price,
         first_class_price=first_class_price
@@ -18,7 +20,7 @@ def add_flight(airline_id, airplane_id, departure, arrival, economy_price, busin
     db.session.commit()
 
 # Aggiunge un aereoplano al database
-def add_airplane(model, capacity, economy_seats,business_seats,first_class_seats, airline_id):
+def add_airplane(model, capacity, economy_seats, business_seats, first_class_seats, airline_id):
     if capacity < (economy_seats + business_seats + first_class_seats):
         raise ValueError("Capacity must be >= sum of all seats.")
     
@@ -78,6 +80,8 @@ def get_flights_by_airline(airline_id):
 # Aggiunge un biletto al database
 def book_ticket(flight_id, passenger_id, seat_number, class_type):    
     if not Ticket.query.filter_by(flight_id=flight_id, seat_number=seat_number).first():
+
+        
         new_ticket = Ticket(
             flight_id=flight_id,
             passenger_id=passenger_id,
@@ -86,3 +90,6 @@ def book_ticket(flight_id, passenger_id, seat_number, class_type):
             )
         db.session.add(new_ticket)
         db.session.commit()
+
+def get_airplanes_by_airline(airline_id):
+    return Airplane.query.filter_by(airline_id=airline_id).all()

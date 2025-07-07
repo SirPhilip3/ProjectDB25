@@ -1,11 +1,10 @@
 
 <html>
-{%extends "base.html" %}
 <head>
   <title>Add Flight</title>
 </head>
 <body>
-  <form action="/add_flight" method="post">
+  <form method="post">
     <label>From: <input type="text" name="from"></label><br>
     <label>To: <input type="text" name="to"></label><br>
     <label>Orario Partenza: <input type="time" name="departure_time"></label><br>
@@ -31,14 +30,14 @@
     <h4>Aereo assegnato</h4>
     <select name="airplane_id">
       {% for airplane in airplanes %}
-        <option value="{{ airplane.id }}">{{ airplane.name }}</option>
+        <option value="{{ airplane.id }}">{{ airplane.model }}</option>
       {% endfor %}
     </select>
 
     <br><br>
-    <input type="submit" value="Add">
+    <button type="submit">Add</button>
   </form>
-
+  <a href="{{ url_for('airline_profile') }}"> Annulla </a>
 
 
    <!-- DA TESTARE  -->

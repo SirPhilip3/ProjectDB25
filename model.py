@@ -2,7 +2,7 @@ import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column , relationship
-from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime
+from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime ,CheckConstraint ,Index
 from database import db
 import uuid
 
@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
     # Relazione: se l'utente è una compagnia, avrà un profilo airline associato
     airline_profile: Mapped["Airline"] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Relazione: se l'utente è un passeggero, avrà delle prenotazioni
-    bookings: Mapped[list["Booking"]] = relationship(back_populates="passenger")
+    # bookings: Mapped[list["Booking"]] = relationship(back_populates="passenger")
 
     def __repr__(self):
         return f"<User {self.username} (Role: {self.role.value})>"
@@ -62,7 +62,8 @@ class Airplane(db.Model):
 
     #! check total capacity < sum of all seats
     
-    airline_id : Mapped[str] = mapped_column(String(36), ForeignKey('airlines.id'), nullable=False)
+    airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
+    airline: Mapped["Airline"] = relationship(back_populates="airplanes")
 
     def __repr__(self):
         return f"<Airplane {self.model} Capacity {self.capacity}>"
@@ -84,6 +85,9 @@ class Flight(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     departure_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     arrival_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
+    #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
+    departure_airport: Mapped[str] = mapped_column(String(100), nullable=False)
+    destination_airport: Mapped[str] = mapped_column(String(100), nullable=False)
     
     # Prezzi base per classe
     economy_price: Mapped[float] = mapped_column(Float, nullable=False)
@@ -92,15 +96,55 @@ class Flight(db.Model):
     
     # Chiavi esterne
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
-    departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
-    destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
     airplane_id: Mapped[str] = mapped_column(ForeignKey('airplanes.id'), nullable=False)
-    
+    #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa , per ora rimane nullabile
+    departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
+    destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
     # Relazioni
     airline: Mapped["Airline"] = relationship(back_populates="flights")
-    departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
-    destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
+    # departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
+    # destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight")
+
+    # Constraints
+    table_args = (
+        CheckConstraint('departure_airport_id != destination_airport_id', name='check_different_airports'),
+        CheckConstraint('arrival_time > departure_time', name='check_arrival_after_departure'),
+        CheckConstraint('economy_price >= 0', name='check_non_negative_economy_price'),
+        CheckConstraint('business_price >= 0', name='check_non_negative_business_price'),
+        CheckConstraint('first_class_price >= 0', name='check_non_negative_first_class_price'),
+        Index('idx_flight_route_time', 'departure_airport_id', 'destination_airport_id', 'departure_time'),
+        Index('idx_flight_airline_time', 'airline_id', 'departure_time'),
+    )
+
+
+    @property
+    def duration(self):
+        """Calcola la durata del volo in minuti"""
+        if self.departure_time and self.arrival_time:
+            delta = self.arrival_time - self.departure_time
+            return int(delta.total_seconds() / 60 )
+        return 0
+    
+
+    @property
+    def available_seats(self):
+        """Calcola i posti disponibili per classe"""
+        if not self.airplane:
+            return {'economy': 0, 'business': 0, 'first_class': 0}
+        
+        # Conta i biglietti venduti per classe
+        sold_economy = len([t for t in self.tickets if t.ticket_class == 'economy'])
+        sold_business = len([t for t in self.tickets if t.ticket_class == 'business'])
+        sold_first = len([t for t in self.tickets if t.ticket_class == 'first_class'])
+        
+        return {
+            'economy': max(0, self.airplane.economy_seats - sold_economy),
+            'business': max(0, self.airplane.business_seats - sold_business),
+            'first_class': max(0, self.airplane.first_class_seats - sold_first)
+        }
+
+
 
     def __repr__(self):
         return f"<Flight {self.id} from {self.departure_airport.iata_code} to {self.destination_airport.iata_code}>"

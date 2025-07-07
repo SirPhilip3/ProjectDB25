@@ -8,7 +8,15 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        <!-- from per aggiungere dettagli dell'aereo -->
-        <button>ADD AIRPLANE</button>
+        <form method="post">
+            <label>Modello: <input type="text" name="model"></label><br>
+            <label>Posti totali: <input type="number" name="capacity"></label><br>
+            <label>Posti Economy: <input type="number" name="seats_economy"></label><br>
+            <label>Posti Business: <input type="number" name="seats_business"></label><br>
+            <label>Posti First Class: <input type="number" name="seats_first"></label><br>
+            <br><br>
+            <button type="submit"> Add Airplane </button><br>
+        </form>
+        <a href="{{ url_for('airline_profile') }}"> Annulla </a>
     </body>
 </html>

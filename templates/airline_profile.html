@@ -8,10 +8,10 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        <h2>My Flights </h2>
-        <a href="/logout">Logout</a> 
-        <!-- non serve nessun id add_flight.html -> current_user.id contiene id della comapagni a cui dobbiamo aggiungere il flight -->
-        <button onclick="window.location.href='{{ url_for('add_flight') }}'">ADD NEW FLIGHT</button>
-        <button onclick="window.location.href='{{ url_for('add_airplane') }}'">ADD NEW AIRPLANE</button>
+        <h2>My Flights </h2> 
+        <!-- non serve nessun id add_flight.html -> current_user.id contiene id della comapagnia cui dobbiamo aggiungere il flight -->
+        <button onclick="window.location.href='{{ url_for('add_flight_page') }}'">ADD NEW FLIGHT</button><br>
+        <button onclick="window.location.href='{{ url_for('add_airplane_page') }}'">ADD NEW AIRPLANE</button><br>
+        <a href="/logout">Logout</a>
     </body>
 </html>
