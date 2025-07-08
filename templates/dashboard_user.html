@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Dashboard</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body>
+        <h1>Your Tickets</h1>
+        {% if tickets %}
+            {% for ticket in tickets %}
+                <div class="ticket">
+                    <p><strong>Flight ID:</strong> {{ ticket.flight_id }}</p>
+                    <p><strong>Seat Number:</strong> {{ ticket.seat_number }}</p>
+                    <p><strong>Class:</strong> {{ ticket.ticket_class }}</p>
+                    <p><strong>Price:</strong> {{ ticket.price }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No tickets found.</p>
+        {% endif %}
+    </body>
+</html>

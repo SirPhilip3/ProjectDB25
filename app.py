@@ -17,39 +17,29 @@ app.register_blueprint(auth, url_prefix='/auth')
 def hello_world():
     flights = []
     # se l'utente ha cliccato search in base.html
-    if request.method == 'POST' and 'search' in request.form:
+    if request.method == 'POST' :
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
-        direct = request.form.get('direct_flight') # True or False
-        class_type = request.form.get('class_type') # Economy, Business, First Class
+        direct = request.form.get('direct_flight') == 'on' # True or False
+        class_type = request.form.get('class_type', 'economy') # Economy, Business, First Class , economy è il default
+        
+        min_price = request.form.get('min_price')
+        max_price = request.form.get('max_price') 
+        sort_by = request.form.get('sort_by') 
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
-        flights = search_flight(from_, to_, direct, class_type)
-    return render_template("base.html", flights=flights)
+        flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by)
+    return render_template("base.html", flights=flights, user=current_user)
 
 # get information about the user (flights tikets etcc)
 #! maybe inutile
 @app.route("/user")
 @login_required
 def user():
-    if current_user.is_authenticated:
-        return f"<p>Welcome, {current_user.username}! {current_user.role}</p>"
+    if current_user.role == UserRole.PASSENGER:
+        tickets = get_user_tickets(current_user.id)
+        return render_template('dashboard_user.html', user=current_user, tickets=tickets)
     else:
-        return "<p>You are not logged in.</p>"
-
-@app.route("/flight/<int:flight_id>")
-def flight_details(flight_id):
-    # deve fare una query per prendere i dettagli del volo
-    flight_details = get_flight_by_id(flight_id)
-
-    if request.method == 'POST':
-        if current_user.is_authenticated :
-            # aggiungi il ticket al database
-            book_ticket()
-        else :
-            flash("You must be logged in to book a flight.")
-            return redirect(url_for('login'))
-    
-    return render_template('flight_details.html', flight=flight_details)
+        return "<p>You are not authorized to view this page.</p>"
 
 # information about the airline
 @app.route("/airline")
@@ -58,9 +48,19 @@ def airline_profile():
     #! maybe fare una funzione a parte per questo check
     if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
-        return render_template('airline_profile.html')
+        flights = get_flights_by_airline(current_user.airline_profile.id)
+        return render_template('airline_profile.html', flights=flights)
     else:
         return "<p>You are not authorized to view this page.</p>"
+
+# Per eliminare una tratta come compagnia aerea
+@app.route("/delete_flight", methods=['POST'])
+@login_required
+def delete_flight():
+    flight_id = request.form.get('flight_id')
+    if current_user.role == UserRole.AIRLINE:
+        delete_flight_by_id(flight_id)
+        return redirect(url_for('airline_profile'))
 
 @app.route("/add_flight", methods=['GET', 'POST'])
 @login_required
@@ -111,40 +111,43 @@ def add_airplane_page():
         return render_template('add_airplane.html')
     else:
         return "<p>You are not authorized to view this page.</p>"
-    
 
-
-
-#ticket/booking route
-
-
-
-@app.route('/tickets', methods=['GET', 'POST'])
+# rotta per prenotare un biglietto 
+@app.route("/flight/<int:flight_id>", methods=['GET', 'POST'])
 @login_required
-def tickets():
+def flight_details(flight_id):
+    # deve fare una query per prendere i dettagli del volo
+    flight_details = get_flight_by_id(flight_id)
+    message = None
+    if current_user.role != UserRole.PASSENGER:
+        flash('Only passengers can book tickets.', 'error')
+        return redirect(url_for('hello_world'))
+
     if request.method == 'POST':
         flight_id = request.form.get('flight_id')
-        ticket_class = request.form.get('ticket_class')
+        ticket_class = request.form.get('ticket_class', 'economy')  # Default economy per ora 
         seat_number = request.form.get('seat_number')
-      
 
-        if current_user.role != UserRole.PASSENGER:
-            flash('Only passengers can book tickets.', 'error')
-            return redirect(url_for('hello_world'))
-
-        ticket, message = book_ticket(
+        ticket , message = book_ticket(
             flight_id=flight_id,
             passenger_id=current_user.id,
             ticket_class=ticket_class,
-            seat_number=seat_number,
-            
+            seat_number=seat_number
         )
 
         if ticket:
             flash('Ticket booked successfully!', 'success')
-            return redirect(url_for('tickets'))
+            # se ha successo ritorno alla pagina principale
+            # o alla pagina in cui l'utente vede i suoi voli prenotati
+            # per ora torno alla pagina principale
+            return redirect(url_for('hello_world'))
         else:
             flash(f'Booking failed: {message}', 'error')
-            return redirect(url_for('tickets'))
+            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message)
 
-    return render_template('tickets.html')  
+    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message)
+
+#tickets route 
+# @app.route('/tickets', methods=['GET', 'POST'])
+# @login_required
+# def tickets():

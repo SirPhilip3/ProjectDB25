@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        
+        <link rel="stylesheet" href="static/style.css">
         <meta charset='utf-8'>
         <meta http-equiv='X-UA-Compatible' content='IE=edge'>
         <title>Flight Detail</title>
@@ -9,10 +11,34 @@
     </head>
     <body>
         <!-- dettagli per il volo selezionato -->
+        {% if error is not none%}
+            <p class="text-red-500">{{ error }}</p>
+        {% endif %}
+
+        <div class="flight-details">
+            <h1 class="text-2xl font-bold mb-4">Flight Details</h1>
+            
+            <div class="mb-4">
+                <p><strong>From:</strong> {{ flight.departure_airport }}</p>
+                <p><strong>To:</strong> {{ flight.destination_airport }}</p>
+                <p><strong>Departure:</strong> {{ flight.departure_time }}</p>
+                <p><strong>Arrival:</strong> {{ flight.arrival_time }}</p>
+            </div>
+        </div>
 
         <!-- Bottone finale per comprare il biglietto (triggera book_ticket()) -->
-        <form action="buy_ticket" method="post">
+        <form method="post">
             <!-- id per trovare il volo da linkare al biglietto-->
+            <label for="seat_number">Seat Number:</label>
+            <input type="number" id="seat_number" name="seat_number" required class="input mb-4" placeholder="Enter seat number">
+
+            <label for="class">Class:</label>
+            <select id="class" name="flight_class" required class="input">
+                <option value="economy">Economy {{ flight.economy_price }}</option>
+                <option value="business">Business {{ flight.business_price }}</option>
+                <option value="first_class">First Class {{ flight.first_class_price }}</option>
+            </select>
+
             <input type="hidden" name="flight_id" value="{{ flight.id }}">
             <button type="submit">Buy</button>
         </form>

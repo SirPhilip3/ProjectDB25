@@ -147,7 +147,7 @@ class Flight(db.Model):
 
 
     def __repr__(self):
-        return f"<Flight {self.id} from {self.departure_airport.iata_code} to {self.destination_airport.iata_code}>"
+        return f"<Flight {self.id} from {self.departure_airport} to {self.destination_airport}>"
 
 
 #! INUTILE

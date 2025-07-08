@@ -9,6 +9,32 @@
     </head>
     <body>
         <h2>My Flights </h2> 
+
+        <div>
+            {% if flights %}
+                <ul>
+                    {% for flight in flights %}
+                        <li>
+                            Departure: {{ flight.departure_airport }}
+                            Arrival: {{ flight.destination_airport }}
+                            Departure time: {{ flight.departure_time }}
+                            Arrival time: {{ flight.arrival_time }}
+                            Economy price: {{ flight.economy_price }} €
+                            Business price: {{ flight.business_price }} €
+                            First class price: {{ flight.first_class_price }} €
+
+                            <form action="{{ url_for('delete_flight') }}" method="POST" style="display:inline;">
+                                <input type="hidden" name="flight_id" value="{{ flight.id }}">
+                                <button type="submit">Delete</button>
+                            </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No flights.</p>
+            {% endif %}
+        </div>
+
         <!-- non serve nessun id add_flight.html -> current_user.id contiene id della comapagnia cui dobbiamo aggiungere il flight -->
         <button onclick="window.location.href='{{ url_for('add_flight_page') }}'">ADD NEW FLIGHT</button><br>
         <button onclick="window.location.href='{{ url_for('add_airplane_page') }}'">ADD NEW AIRPLANE</button><br>

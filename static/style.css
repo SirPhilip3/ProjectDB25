@@ -1,3 +1,427 @@
+/* ===================================
+  Airways - Main Stylesheet
+   =================================== */
+
+/* ===== VARIABLES ===== */
+:root {
+    --primary-color: #667eea;
+    --primary-dark: #764ba2;
+    --secondary-color: #f8f9fa;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-primary-hover: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    --gradient-primary-45: linear-gradient(45deg, #667eea, #764ba2);
+    
+    --border-radius: 15px;
+    --border-radius-lg: 20px;
+    --border-radius-sm: 10px;
+    --border-radius-pill: 25px;
+    
+    --shadow-sm: 0 2px 10px rgba(0,0,0,0.1);
+    --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+    --shadow-xl: 0 15px 35px rgba(0,0,0,0.1);
+    --shadow-2xl: 0 20px 40px rgba(0,0,0,0.1);
+    
+    --transition: all 0.3s ease;
+    --transition-fast: all 0.2s ease;
+}
+
+/* ===== GLOBAL STYLES ===== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* ===== NAVBAR STYLES ===== */
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* ===== BUTTON STYLES ===== */
+.btn-primary {
+    background: var(--gradient-primary-45);
+    border: none;
+    border-radius: var(--border-radius-pill);
+    padding: 12px 30px;
+    font-weight: 500;
+    transition: var(--transition-fast);
+}
+
+.btn-primary:hover {
+    background: var(--gradient-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:disabled {
+    background: linear-gradient(45deg, #6c757d, #adb5bd);
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== CARD STYLES ===== */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ===== HERO SECTION ===== */
+.hero-section {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 80px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.1;
+}
+
+/* ===== SEARCH CARD ===== */
+.search-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    padding: 30px;
+    margin-top: -50px;
+    position: relative;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+/* ===== FLIGHT CARD ===== */
+.flight-card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.flight-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* ===== FORM STYLES ===== */
+.form-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 40px 0;
+}
+
+.form-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: none;
+    margin-top: -30px;
+    position: relative;
+    z-index: 10;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+/* ===== AUTH STYLES ===== */
+.auth-page {
+    background: var(--gradient-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.auth-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-xl);
+    overflow: hidden;
+}
+
+.auth-header {
+    background: var(--gradient-primary-45);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+/* ===== DASHBOARD STYLES ===== */
+.dashboard-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 40px 0;
+}
+
+.stat-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    border: none;
+    margin-bottom: 20px;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* ===== PROFILE STYLES ===== */
+.profile-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 40px 0;
+}
+
+/* ===== TICKET STYLES ===== */
+.ticket-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    border: none;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.ticket-header {
+    background: var(--gradient-primary-45);
+    color: white;
+    padding: 15px 20px;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: var(--border-radius-sm);
+}
+
+/* ===== PRICE CARD ===== */
+.price-card {
+    background: var(--gradient-primary-45);
+    color: white;
+    border-radius: var(--border-radius);
+}
+
+/* ===== BOOKING STYLES ===== */
+.booking-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: none;
+}
+
+/* ===== ERROR PAGES ===== */
+.error-page {
+    background: var(--gradient-primary);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.error-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-2xl);
+    padding: 60px 40px;
+    text-align: center;
+    max-width: 500px;
+}
+
+.error-icon {
+    font-size: 6rem;
+    margin-bottom: 30px;
+}
+
+/* ===== UTILITY CLASSES ===== */
+.gradient-bg {
+    background: var(--gradient-primary);
+}
+
+.gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-custom {
+    box-shadow: var(--shadow-lg);
+}
+
+.rounded-custom {
+    border-radius: var(--border-radius);
+}
+
+.transition-custom {
+    transition: var(--transition);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 60px 0;
+    }
+    
+    .search-card {
+        margin-top: -30px;
+        padding: 20px;
+    }
+    
+    .form-header {
+        padding: 30px 0;
+    }
+    
+    .dashboard-header,
+    .profile-header {
+        padding: 30px 0;
+    }
+    
+    .error-card {
+        padding: 40px 20px;
+        margin: 20px;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.pulse-hover:hover {
+    animation: pulse 0.6s ease-in-out;
+}
+
+/* ===== LOADING STATES ===== */
+.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* ===== FOCUS STYLES ===== */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.25);
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .navbar,
+    .btn,
+    .error-page {
+        display: none !important;
+    }
+    
+    .ticket-card,
+    .booking-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}
+
+
+
+
 /* static/style.css */
 body {
     font-family: Arial, sans-serif;

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        
+        <link rel="stylesheet" href="static/style.css">
         <meta charset='utf-8'>
         <meta http-equiv='X-UA-Compatible' content='IE=edge'>
         <title>Flights</title>
@@ -8,18 +10,29 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        <a href="{{ url_for('login') }}"> Login </a>
-        <a href="{{ url_for('register') }}"> Register </a>
+        {% if not current_user.is_anonymous %}
+            <h1>Welcome, {{ current_user.email }}!</h1>
+            {% if current_user.role == current_user.role.PASSENGER %}
+                <a href="{{ url_for('user') }}"> My Profile</a>
+                <a href="{{ url_for('logout') }}"> Logout </a>
+            {% elif current_user.role == current_user.role.AIRLINE %}
+                <a href="{{ url_for('airline_profile') }}"> My Flights </a>
+                <a href="{{ url_for('logout') }}"> Logout </a>
+            {% endif %}
+        {% else %}
+            <a href="{{ url_for('login') }}"> Login </a>
+            <a href="{{ url_for('register') }}"> Register </a>
+        {% endif %}
         
         <div class="select-flight">
-            <form name="flight" method="post" action="">
+            <form name="flight" method="post">
                 <div class="mb-4">
-                    <label for="username">From:</label>
-                    <input type="text" id="start_airport" name="from" required class="input" placeholder="Da dove vuoi partire?">
+                    <label for="start_airport">From:</label>
+                    <input type="text" id="start_airport" name="start_airport" required class="input" placeholder="Da dove vuoi partire?">
                 </div>
                 <div class="mb-6">
-                    <label for="password">To:</label>
-                    <input type="text" id="end_airport" name="to" required class="input" placeholder="Dove vuoi andare?">
+                    <label for="end_airport">To:</label>
+                    <input type="text" id="end_airport" name="end_airport" required class="input" placeholder="Dove vuoi andare?">
                 </div>
                 <div>
                     <label>Filters</label>
@@ -33,7 +46,7 @@
                     <div class="mb-4">
                         <label>Price Range:</label>
                         <div class="flex gap-2">
-                            <input type="number" name="min_price" placeholder="Min €" class="input">
+                            <input type="number" name="min_price" placeholder="Min €" min ="0" class="input">
                             <input type="number" name="max_price" placeholder="Max €" class="input">
                         </div>
                     </div>
@@ -57,11 +70,11 @@
                         <select id="class" name="flight_class" required class="input">
                             <option value="economy">Economy</option>
                             <option value="business">Business</option>
-                            <option value="first">First Class</option>
+                            <option value="first_class">First Class</option>
                         </select>
                     </div>
                 </div>
-                <button type="submit">Search</button>
+                <button type="submit" name="search">Search</button>
             </form>
         </div>
         <div class="flight-results">
@@ -72,9 +85,9 @@
                         <li>
                             Departure: {{ flight.departure_time }}<br>
                             Arrival: {{ flight.arrival_time }}<br>
-                            Price: ${{ flight.price }}<br>
+                            Price: ${{ flight.selected_price }}<br>
                             <!-- Button che redirecta a /flight/flight_id=id per avere i dettagli del volo-->
-                            <button class="btn-simple" onclick="window.location.href='{{ url_for('flight' , flight_id = flight.id) }}'">SELECT</button> 
+                            <button class="btn-simple" onclick="window.location.href='{{ url_for('flight_details' , flight_id = flight.id) }}'">SELECT</button> 
                         </li>
                     {% endfor %}
                 </ul>
