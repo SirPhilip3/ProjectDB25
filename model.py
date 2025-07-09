@@ -60,7 +60,12 @@ class Airplane(db.Model):
     business_seats: Mapped[int] = mapped_column(Integer, nullable=False)
     first_class_seats: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    #! check total capacity < sum of all seats
+    # check total capacity < sum of all seats
+    __table_args__ = (
+        CheckConstraint(
+            'capacity <= economy_seats + business_seats + first_class_seats', name='check_capacity_seats_sum'
+        ),
+    )
     
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
     airline: Mapped["Airline"] = relationship(back_populates="airplanes")
@@ -71,7 +76,7 @@ class Airplane(db.Model):
 class Airport(db.Model):
     __tablename__ = 'airports'
     
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name: Mapped[str] = mapped_column(String(150), nullable=False)
     city: Mapped[str] = mapped_column(String(150), nullable=False)
     iata_code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False) # es. "FCO" per Fiumicino
@@ -82,7 +87,7 @@ class Airport(db.Model):
 class Flight(db.Model):
     __tablename__ = 'flights'
     
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     departure_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     arrival_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
@@ -101,10 +106,10 @@ class Flight(db.Model):
     departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
     destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
     # Relazioni
-    airline: Mapped["Airline"] = relationship(back_populates="flights")
+    airline: Mapped["Airline"] = relationship(back_populates="flights") 
     # departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
     # destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
-    tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight")
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight") 
 
     # Constraints
     table_args = (
@@ -168,7 +173,7 @@ class Flight(db.Model):
 class Ticket(db.Model):
     __tablename__ = 'tickets'
     
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     seat_number: Mapped[str] = mapped_column(String(10), nullable=False)
     ticket_class: Mapped[str] = mapped_column(String(20), nullable=False) # 'economy', 'business', 'first'
     price: Mapped[float] = mapped_column(Float, nullable=False)

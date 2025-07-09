@@ -81,15 +81,39 @@
             {% if flights %}
                 <h2>Available Flights</h2>
                 <ul>
-                    {% for flight in flights %}
-                        <li>
-                            Departure: {{ flight.departure_time }}<br>
-                            Arrival: {{ flight.arrival_time }}<br>
-                            Price: ${{ flight.selected_price }}<br>
-                            <!-- Button che redirecta a /flight/flight_id=id per avere i dettagli del volo-->
-                            <button class="btn-simple" onclick="window.location.href='{{ url_for('flight_details' , flight_id = flight.id) }}'">SELECT</button> 
-                        </li>
-                    {% endfor %}
+                    <!-- diversa view se flight singoli o meno -->
+                    {% if direct_flight %}
+                        {% for flight in flights %}
+                            <li>
+                                Departure Time: {{ flight.departure_time }}<br>
+                                Arrival Time: {{ flight.arrival_time }}<br>
+                                Price: ${{ flight.selected_price }}<br>
+                                <!-- Button che redirecta a /flight/flight_id=id per avere i dettagli del volo-->
+                                <button class="btn-simple" onclick="window.location.href='{{ url_for('flight_details' , flight_id = flight.id) }}'">SELECT</button> 
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        {% for first_flight, second_flight in flights %}
+                            <li>
+                                <!-- Primo volo -->
+                                From: {{ first_flight.departure_airport }}<br>
+                                To: {{ second_flight.destination_airport }}<br>
+                                Departure Time: {{ first_flight.departure_time }}<br>
+                                
+                                <!-- Secondo volo -->
+                                Connection: {{ second_flight.departure_airport }}<br>
+                                Second Flight Departure Time: {{ second_flight.departure_time }}<br>
+                                Final Arrival Time: {{ second_flight.arrival_time }}<br>
+                                
+                                <!-- Calcola prezzo totale -->
+                                <!-- ! dobbiamo fare in modo che l'utente possa selezionare 2 diverse classi di biglietti -->
+                                Total Price: €{{ first_flight.selected_price + second_flight.selected_price }}<br>
+                                
+                                <button onclick="window.location.href='{{ url_for('flight_details', flight_id=first_flight.id) }}'">BOOK FIRST FLIGHT</button>
+                                <button onclick="window.location.href='{{ url_for('flight_details', flight_id=second_flight.id) }}'">BOOK SECOND FLIGHT</button>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
                 </ul>
             {% else %}
                 <p>No flights available for the selected route.</p>

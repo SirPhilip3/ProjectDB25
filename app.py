@@ -10,25 +10,54 @@ from datetime import datetime, date
 
 with app.app_context():
     db.create_all()
+    carica_triggers()
 
 app.register_blueprint(auth, url_prefix='/auth')
+
+# 404 page
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html')
 
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
     flights = []
+    #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
+    direct = False # False di default
     # se l'utente ha cliccato search in base.html
     if request.method == 'POST' :
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
         direct = request.form.get('direct_flight') == 'on' # True or False
-        class_type = request.form.get('class_type', 'economy') # Economy, Business, First Class , economy è il default
+        class_type = request.form.get('flight_class') # Economy, Business, First Class 
         
-        min_price = request.form.get('min_price')
+        imprime = request.form.get('min_price')
         max_price = request.form.get('max_price') 
         sort_by = request.form.get('sort_by') 
+        
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
         flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by)
-    return render_template("base.html", flights=flights, user=current_user)
+    return render_template("base.html", flights=flights, user=current_user, direct_flight=direct)
+
+# @app.route("/", methods=['GET', 'POST'])
+# def hello_world():
+#     #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
+#     flights_diretti = []
+#     flights_indiretti = []
+#     # se l'utente ha cliccato search in base.html
+#     if request.method == 'POST' :
+#         from_ = request.form.get('start_airport') 
+#         to_ = request.form.get('end_airport')
+#         class_type = request.form.get('flight_class') # Economy, Business, First Class 
+        
+#         min_price = request.form.get('min_price')
+#         max_price = request.form.get('max_price') 
+#         sort_by = request.form.get('sort_by') 
+        
+#         # funzione per cercare i voli , deve tornare una lista di voli con flight id
+#         flights_dir = search_flight(from_, to_, True, class_type, min_price, max_price, sort_by)
+#         flights_ind = search_flight(from_, to_, False, class_type, min_price, max_price, sort_by)
+#     return render_template("base.html", flights_diretti=flights_dir, flights_indiretti=flights_ind ,user=current_user, direct_flight=direct)
 
 # get information about the user (flights tikets etcc)
 #! maybe inutile
@@ -62,6 +91,7 @@ def delete_flight():
         delete_flight_by_id(flight_id)
         return redirect(url_for('airline_profile'))
 
+# Per aggiungere una tratta come compagnia aerea
 @app.route("/add_flight", methods=['GET', 'POST'])
 @login_required
 def add_flight_page():
@@ -95,7 +125,8 @@ def add_flight_page():
         return render_template('add_flight.html', airplanes=airplanes)
     else:
         return "<p>You are not authorized to view this page.</p>"
-    
+
+# Per aggiungere un aereo come compagnia aerea
 @app.route("/add_airplane", methods=['GET', 'POST'])
 @login_required
 def add_airplane_page():
@@ -112,12 +143,12 @@ def add_airplane_page():
     else:
         return "<p>You are not authorized to view this page.</p>"
 
-# rotta per prenotare un biglietto 
-@app.route("/flight/<int:flight_id>", methods=['GET', 'POST'])
+# Per prenotare un biglietto 
+@app.route("/flight/<uuid:flight_id>", methods=['GET', 'POST'])
 @login_required
 def flight_details(flight_id):
     # deve fare una query per prendere i dettagli del volo
-    flight_details = get_flight_by_id(flight_id)
+    flight_details = get_flight_by_id(str(flight_id))
     message = None
     if current_user.role != UserRole.PASSENGER:
         flash('Only passengers can book tickets.', 'error')
@@ -125,7 +156,7 @@ def flight_details(flight_id):
 
     if request.method == 'POST':
         flight_id = request.form.get('flight_id')
-        ticket_class = request.form.get('ticket_class', 'economy')  # Default economy per ora 
+        ticket_class = request.form.get('flight_class')  
         seat_number = request.form.get('seat_number')
 
         ticket , message = book_ticket(
@@ -147,7 +178,3 @@ def flight_details(flight_id):
 
     return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message)
 
-#tickets route 
-# @app.route('/tickets', methods=['GET', 'POST'])
-# @login_required
-# def tickets():

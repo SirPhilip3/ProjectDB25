@@ -45,7 +45,7 @@ def login ():
 @app.route("/register" , methods=['GET', 'POST'])
 def register ():
     if request.method == 'POST':
-        mail = request.form.get('email')
+        email = request.form.get('email')
         password = request.form.get('password')
 
         type = request.form.get('role')
@@ -55,7 +55,7 @@ def register ():
         airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(email=mail, role=role, password=hashed_password)
+        new_user = User(email=email, role=role, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 

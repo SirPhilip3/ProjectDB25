@@ -2,7 +2,18 @@
 from database import db
 from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased 
-from sqlalchemy import event  
+from sqlalchemy import text
+from flask import flash, redirect, url_for
+from datetime import timedelta
+
+def carica_triggers():
+    with open('triggers.sql', 'r') as file:
+        sql_script = file.read()
+        with db.engine.begin() as connection:
+            for statement in sql_script.split('#'):
+                stmt = statement.strip()
+                if stmt:
+                    connection.execute(text(stmt))
 
 # Aggiunge una tratta al database
 def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,departure_time, arrival_time, economy_price, business_price, first_class_price):
@@ -17,28 +28,15 @@ def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,depa
         business_price=business_price,
         first_class_price=first_class_price
     )
-    db.session.add(new_flight)
-    db.session.commit()
-
-#! maybe meglio farlo con trigger SQL normali
-@event.listens_for(Flight, 'before_insert')
-def prevent_airplane_overlap(mapper, connection, target: Flight):
-    #
-    overlapping_flights = Flight.query.filter(
-    Flight.airplane_id == airplane_id, 
-    Flight.departure_time < arrival_time, 
-    Flight.arrival_time > departure_time
-    ).all()
-    if overlapping_flights:
-        #TODO Notificare l'errore
+    try:
+        db.session.add(new_flight)
+        db.session.commit()
+    except Exception as e:
+        flash(str(e))
         return redirect(url_for('add_flight_page'))
-    return 0
 
 # Aggiunge un aereoplano al database
 def add_airplane(model, capacity, economy_seats, business_seats, first_class_seats, airline_id):
-    if capacity < (economy_seats + business_seats + first_class_seats):
-        raise ValueError("Capacity must be >= sum of all seats.")
-    
     new_airplane = Airplane(
         model=model,
         capacity=capacity,
@@ -57,6 +55,7 @@ def delete_flight_by_id(flight_id):
         db.session.commit()
 
 # Ritorna i voli diretti o indiretti filtrati con i parametri corrispondenti
+#! da rivedere l'implemetazione
 def search_flight(departure, arrival, direct_flight, class_type, min_price=None, max_price=None, sort_by=None):
     if direct_flight:
         query = Flight.query.filter(
@@ -65,12 +64,15 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
     else:
         F1 = aliased(Flight)
         F2 = aliased(Flight)
-        query = db.session.query(F1).filter(
+        query = db.session.query(F1, F2).filter(
             F1.departure_airport == departure,
             F1.destination_airport == F2.departure_airport,
-            F2.destination_airport == arrival)
+            F2.destination_airport == arrival,
+            # devono essere separati da almeno 2 ore , potremmo aggiungere un limite massimo
+            F2.departure_time >= F1.arrival_time + timedelta(hours=2))
     
     # Filtri per prezzo
+    #! implementazione diversa per i voli con uno stop 
     if min_price:
         min_price = float(min_price)
         price_field = getattr(Flight, f"{class_type}_price")
@@ -98,10 +100,21 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
     
     # Esegui la query
     flights = query.all()
-    # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-    for flight in flights:
-        flight.selected_class = class_type
-        flight.selected_price = getattr(flight, f"{class_type}_price")
+    
+    #! implementazione diversa per i voli con uno stop 
+    if direct_flight:
+        # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
+        for flight in flights:
+            flight.selected_class = class_type
+            flight.selected_price = getattr(flight, f"{class_type}_price")
+    else:
+        # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
+        for first_flight, second_flight in flights:
+            first_flight.selected_class = class_type
+            first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
+            second_flight.selected_class = class_type
+            second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
+    
     return flights
 
 #Ritorna un volo specifico con l'id corrispondente
