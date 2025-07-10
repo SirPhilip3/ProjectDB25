@@ -16,7 +16,7 @@
                 <a href="{{ url_for('user') }}"> My Profile</a>
                 <a href="{{ url_for('logout') }}"> Logout </a>
             {% elif current_user.role == current_user.role.AIRLINE %}
-                <a href="{{ url_for('airline_profile') }}"> My Flights </a>
+                <a href="{{ url_for('airline_profile' , airline_id=current_user.airline_profile.id) }}"> My Flights </a>
                 <a href="{{ url_for('logout') }}"> Logout </a>
             {% endif %}
         {% else %}

@@ -7,20 +7,35 @@
 </head>
 <body>
   <form method="post">
-    <label>From: <input type="text" name="from"></label><br>
-    <label>To: <input type="text" name="to"></label><br>
-    <label>Orario Partenza: <input type="time" name="departure_time"></label><br>
-    <label>Orario Arrivo: <input type="time" name="arrival_time"></label><br>
+    <label>From: <input type="text" name="from" required></label><br>
+    <label>To: <input type="text" name="to" required></label><br>
+    <label>Orario Partenza: <input type="time" name="departure_time" required></label><br>
+    <label>Orario Arrivo: <input type="time" name="arrival_time" required></label><br>
+    
+    <h4>Aereo assegnato</h4>
+    <select name="airplane_id" id="airplane-select" onchange="updateAirplaneInfo()" required>
+      <option value="">Seleziona un aereo</option>
+      {% for airplane in airplanes %}
+        <option value="{{ airplane.id }}" 
+                data-economy="{{ airplane.economy_seats }}" 
+                data-business="{{ airplane.business_seats }}" 
+                data-first="{{ airplane.first_class_seats }}"
+                data-capacity="{{ airplane.capacity }}">{{ airplane.model }}</option>
+      {% endfor %}
+    </select>
 
-    <h4>Posti Disponibili</h4>
-    <label>Economy: <input type="number" name="seats_economy"></label><br>
-    <label>Business: <input type="number" name="seats_business"></label><br>
-    <label>First: <input type="number" name="seats_first"></label><br>
+    <div id="airplane-info" style="display: none;">
+      <h4>Posti Disponibili</h4>
+      <p>Economy: <strong id="economy-seats">-</strong> posti</p>
+      <p>Business: <strong id="business-seats">-</strong> posti</p>
+      <p>First Class: <strong id="first-seats">-</strong> posti</p>
+      <p><strong>Totale: <span id="total-seats">-</span> posti</strong></p>
+    </div>
 
     <h4>Costo Posti</h4>
-    <label>Economy: <input type="number" name="price_economy"></label><br>
-    <label>Business: <input type="number" name="price_business"></label><br>
-    <label>First: <input type="number" name="price_first"></label><br>
+    <label>Economy: <input type="number" name="price_economy" required></label><br>
+    <label>Business: <input type="number" name="price_business" required></label><br>
+    <label>First: <input type="number" name="price_first" required></label><br>
 
     <h4>Extra</h4>
     <div id="extra-fields">
@@ -28,22 +43,43 @@
       <input type="number" name="extra_price_1" placeholder="Extra Price">
     </div>
     <button type="button" onclick="addExtra()">Add New</button>
-
-    <h4>Aereo assegnato</h4>
-    <select name="airplane_id">
-      {% for airplane in airplanes %}
-        <option value="{{ airplane.id }}">{{ airplane.model }}</option>
-      {% endfor %}
-    </select>
+    
 
     <br><br>
     <button type="submit">Add</button>
   </form>
-  <a href="{{ url_for('airline_profile') }}"> Annulla </a>
+  <a href="{{ url_for('airline_profile', airline_id=current_user.airline_profile.id) }}"> Annulla </a>
 
 
    <!-- DA TESTARE  -->
   <script>
+
+    function updateAirplaneInfo() {
+      const select = document.getElementById('airplane-select');
+      const selectedOption = select.options[select.selectedIndex];
+      const infoDiv = document.getElementById('airplane-info');
+      
+      if (selectedOption.value === '') {
+        infoDiv.style.display = 'none';
+        return;
+      }
+      
+      // Ottieni i dati dall'option selezionata
+      const economySeats = selectedOption.getAttribute('data-economy');
+      const businessSeats = selectedOption.getAttribute('data-business');
+      const firstSeats = selectedOption.getAttribute('data-first');
+      const capacity = selectedOption.getAttribute('data-capacity');
+      
+      // Aggiorna le informazioni (solo visualizzazione)
+      document.getElementById('economy-seats').textContent = economySeats;
+      document.getElementById('business-seats').textContent = businessSeats;
+      document.getElementById('first-seats').textContent = firstSeats;
+      document.getElementById('total-seats').textContent = capacity;
+      
+      // Mostra il div informazioni
+      infoDiv.style.display = 'block';
+    }
+
     let extraCount = 1;
     function addExtra() {
       extraCount++;

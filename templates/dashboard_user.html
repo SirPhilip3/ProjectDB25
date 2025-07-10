@@ -17,6 +17,16 @@
                     <p><strong>Seat Number:</strong> {{ ticket.seat_number }}</p>
                     <p><strong>Class:</strong> {{ ticket.ticket_class }}</p>
                     <p><strong>Price:</strong> {{ ticket.price }}</p>
+                    <p><strong>Extras:</strong>
+                        {% if ticket.selected_extras %}
+                            <ul>
+                                {% for extra in ticket.selected_extras %}
+                                    <li>{{ extra.name }} - €{{ extra.price }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            None
+                        {% endif %}
                 </div>
             {% endfor %}
         {% else %}

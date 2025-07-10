@@ -1,10 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, make_response
 from flask_login import login_required , current_user
 from flask_sqlalchemy import SQLAlchemy 
 from auth import auth
 from database import db , app
 from crud import *
-from crud import book_ticket
 from model import UserRole
 from datetime import datetime, date
 
@@ -25,13 +24,13 @@ def hello_world():
     #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
     direct = False # False di default
     # se l'utente ha cliccato search in base.html
-    if request.method == 'POST' :
+    if request.method == 'POST':
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
         direct = request.form.get('direct_flight') == 'on' # True or False
         class_type = request.form.get('flight_class') # Economy, Business, First Class 
         
-        imprime = request.form.get('min_price')
+        min_price = request.form.get('min_price')
         max_price = request.form.get('max_price') 
         sort_by = request.form.get('sort_by') 
         
@@ -66,19 +65,30 @@ def hello_world():
 def user():
     if current_user.role == UserRole.PASSENGER:
         tickets = get_user_tickets(current_user.id)
-        return render_template('dashboard_user.html', user=current_user, tickets=tickets)
+        # remove cache
+        response = make_response(render_template('dashboard_user.html', user=current_user, tickets=tickets))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return response
     else:
         return "<p>You are not authorized to view this page.</p>"
 
 # information about the airline
-@app.route("/airline")
+#! protrei entrare quando faccio back 
+@app.route("/airline/<uuid:airline_id>")
 @login_required
-def airline_profile():
+def airline_profile(airline_id):
     #! maybe fare una funzione a parte per questo check
     if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
         flights = get_flights_by_airline(current_user.airline_profile.id)
-        return render_template('airline_profile.html', flights=flights)
+
+        # per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
+        # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
+        # aggiunge headers per disabilitare la cache
+        response = make_response(render_template('airline_profile.html', flights=flights))
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        
+        return response
     else:
         return "<p>You are not authorized to view this page.</p>"
 
@@ -117,8 +127,21 @@ def add_flight_page():
             first_class_price = float(request.form['price_first'])
 
             airplane_id = request.form['airplane_id'] 
+            
+            extras = []
+            for key, value in request.form.items():
+                if key.startswith('extra_name') and value:
+                    number = key.split('_')[-1]
+                    price = request.form.get(f'extra_price_{number}')
+                    if price:
+                        extras.append({
+                            'name': value,
+                            'price': float(price) 
+                        })
+                    else :
+                        print(f"Extra {value} has no price, skipping.")
             #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
-            add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price)
+            add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
     
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
         
@@ -159,11 +182,24 @@ def flight_details(flight_id):
         ticket_class = request.form.get('flight_class')  
         seat_number = request.form.get('seat_number')
 
+        selected_extras = []
+        for key, value in request.form.items():
+            if key == "selected_extras" and value:
+                name , cost = value.split('|')
+                if name and cost:
+                    selected_extras.append({
+                        'name': name,
+                        'price': float(cost)
+                    })
+                else :
+                    print("Invalid extra selected")
+
         ticket , message = book_ticket(
             flight_id=flight_id,
             passenger_id=current_user.id,
             ticket_class=ticket_class,
-            seat_number=seat_number
+            seat_number=seat_number,
+            selected_extras=selected_extras
         )
 
         if ticket:

@@ -38,9 +38,71 @@
                 <option value="business">Business {{ flight.business_price }}</option>
                 <option value="first_class">First Class {{ flight.first_class_price }}</option>
             </select>
+            <div class="extras-section mb-4">
+                <label for="extras">Extras:</label>
+                {% if flight.extras and flight.extras|length > 0 %}
+                    <div class="extras-list">
+                        {% for extra in flight.extras %}
+                            <div class="extra-item flex items-center mb-2">
+                                <input type="checkbox" 
+                                       id="extra_{{ loop.index }}" 
+                                       name="selected_extras" 
+                                       value="{{ extra.name }}|{{ extra.price }}"
+                                       class="mr-2"
+                                       onchange="updateTotalPrice()">
+                                <label for="extra_{{ loop.index }}" class="cursor-pointer">
+                                    {{ extra.name }} - €{{ extra.price }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-gray-500">Nessun extra disponibile per questo volo</p>
+                {% endif %}
+            </div>
+
+            <div class="price-summary">
+                <p><strong>Prezzo base: €<span id="base-price">0</span></strong></p>
+                <p>Extras: €<span id="extras-price">0</span></p>
+                <p class="text-lg font-bold">Totale: €<span id="total-price">0</span></p>
+            </div>
 
             <input type="hidden" name="flight_id" value="{{ flight.id }}">
             <button type="submit">Buy</button>
         </form>
     </body>
+    <script>
+        const flightPrices = {
+            'economy': {{ flight.economy_price }},
+            'business': {{ flight.business_price }},
+            'first_class': {{ flight.first_class_price }}
+        };
+
+        function updateTotalPrice() {
+            // Ottieni la classe selezionata
+            const selectedClass = document.getElementById('class').value;
+            const basePrice = flightPrices[selectedClass] || 0;
+            
+            // Calcola il prezzo degli extra selezionati
+            let extrasPrice = 0;
+            const selectedExtras = document.querySelectorAll('input[name="selected_extras"]:checked');
+            
+            selectedExtras.forEach(checkbox => {
+                const value = checkbox.value; // formato: "nome|prezzo"
+                const price = parseFloat(value.split('|')[1]) || 0;
+                extrasPrice += price;
+            });
+            
+            // Aggiorna il display
+            document.getElementById('base-price').textContent = basePrice.toFixed(2);
+            document.getElementById('extras-price').textContent = extrasPrice.toFixed(2);
+            document.getElementById('total-price').textContent = (basePrice + extrasPrice).toFixed(2);
+        }
+
+        // Aggiorna il prezzo quando cambia la classe
+        document.getElementById('class').addEventListener('change', updateTotalPrice);
+        
+        // Inizializza il prezzo al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', updateTotalPrice);
+    </script>
 </html>

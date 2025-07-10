@@ -2,14 +2,14 @@ import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column , relationship
-from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime ,CheckConstraint ,Index
+from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime ,CheckConstraint ,Index, JSON
 from database import db
 import uuid
 
 # usiamo stesso UserMixin per tutti gli utenti, sia airline che passenger
 # diffenrenziamo per fare le query attraverso il campo boolean role 
 
-# Usiamo un Enum per i ruoli, è più pulito e manutenibile
+# Usiamo un Enum per i ruoli
 class UserRole(enum.Enum):
     PASSENGER = 'passenger'
     AIRLINE = 'airline'
@@ -111,6 +111,8 @@ class Flight(db.Model):
     # destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight") 
 
+    extras: Mapped[dict] = mapped_column(JSON, nullable=True) # Lista di extra disponibili [{"name":name, "price": price}, ...]
+
     # Constraints
     table_args = (
         CheckConstraint('departure_airport_id != destination_airport_id', name='check_different_airports'),
@@ -177,7 +179,7 @@ class Ticket(db.Model):
     seat_number: Mapped[str] = mapped_column(String(10), nullable=False)
     ticket_class: Mapped[str] = mapped_column(String(20), nullable=False) # 'economy', 'business', 'first'
     price: Mapped[float] = mapped_column(Float, nullable=False)
-    # extras (es. bagaglio extra) potrebbe essere un campo JSON o una tabella separata
+    selected_extras: Mapped[dict] = mapped_column(JSON, nullable=True)  # Lista di dizionari per gli extra selezionati
     
     passenger_id: Mapped[str] = mapped_column(ForeignKey('users.id'), nullable=False)
     # Chiavi esterne
