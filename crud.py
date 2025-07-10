@@ -170,14 +170,13 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
             flights.sort(key=lambda pair: (
             pair[0].selected_price if pair[1] is None 
             else pair[0].selected_price + pair[1].selected_price), reverse=True)
-            
         elif sort_by == 'departure_asc':
-            fligght.so
-            query = query.order_by(Flight.departure_time.asc())
+            flights.sort(key=lambda pair: pair[0].departure_time)
         elif sort_by == 'departure_desc':
-            query = query.order_by(Flight.departure_time.desc())
+            flights.sort(key=lambda pair: pair[0].departure_time,reverse=True)
         elif sort_by == 'duration_asc':
-            query = query.order_by((Flight.arrival_time - Flight.departure_time).asc())
+            flights.sort(key=lambda pair: ((pair[0].arrival_time - pair[0].departure_time).total_seconds()
+            if pair[1] is None else (pair[1].arrival_time - pair[0].departure_time).total_seconds()))
 
     # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
     for first_flight, second_flight in flights:

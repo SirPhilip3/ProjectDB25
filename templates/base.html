@@ -82,18 +82,20 @@
                 <h2>Available Flights</h2>
                 <ul>
                     <!-- diversa view se flight singoli o meno -->
-                    {% if direct_flight %}
-                        {% for flight in flights %}
+                    {% for flight in flights %}
+                    {% if flight[1] is none %}
+                        
                             <li>
-                                Departure Time: {{ flight.departure_time }}<br>
-                                Arrival Time: {{ flight.arrival_time }}<br>
-                                Price: ${{ flight.selected_price }}<br>
+                                Departure Time: {{ flight[0].departure_time }}<br>
+                                Arrival Time: {{ flight[0].arrival_time }}<br>
+                                Price: ${{ flight[0].selected_price }}<br>
                                 <!-- Button che redirecta a /flight/flight_id=id per avere i dettagli del volo-->
-                                <button class="btn-simple" onclick="window.location.href='{{ url_for('flight_details' , flight_id = flight.id) }}'">SELECT</button> 
+                                <button class="btn-simple" onclick="window.location.href='{{ url_for('flight_details' , flight_id = flight[0].id) }}'">SELECT</button> 
                             </li>
-                        {% endfor %}
+                        
                     {% else %}
-                        {% for first_flight, second_flight in flights %}
+                        {% set first_flight = flight[0] %}
+                        {% set second_flight = flight[1] %}
                             <li>
                                 <!-- Primo volo -->
                                 From: {{ first_flight.departure_airport }}<br>
@@ -112,8 +114,8 @@
                                 <button onclick="window.location.href='{{ url_for('flight_details', flight_id=first_flight.id) }}'">BOOK FIRST FLIGHT</button>
                                 <button onclick="window.location.href='{{ url_for('flight_details', flight_id=second_flight.id) }}'">BOOK SECOND FLIGHT</button>
                             </li>
-                        {% endfor %}
                     {% endif %}
+                    {% endfor %}
                 </ul>
             {% else %}
                 <p>No flights available for the selected route.</p>
