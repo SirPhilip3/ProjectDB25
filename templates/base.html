@@ -14,11 +14,10 @@
             <h1>Welcome, {{ current_user.email }}!</h1>
             {% if current_user.role == current_user.role.PASSENGER %}
                 <a href="{{ url_for('user') }}"> My Profile</a>
-                <a href="{{ url_for('logout') }}"> Logout </a>
             {% elif current_user.role == current_user.role.AIRLINE %}
                 <a href="{{ url_for('airline_profile' , airline_id=current_user.airline_profile.id) }}"> My Flights </a>
-                <a href="{{ url_for('logout') }}"> Logout </a>
             {% endif %}
+            <a href="{{ url_for('logout') }}"> Logout </a>
         {% else %}
             <a href="{{ url_for('login') }}"> Login </a>
             <a href="{{ url_for('register') }}"> Register </a>
@@ -27,10 +26,23 @@
         <div class="select-flight">
             <form name="flight" method="post">
                 <div class="mb-4">
+                    <!-- <label>From:
+                        <input type="text" name="name_from" required placeholder="Airport Name">
+                        <input type="text" name="city_from" required placeholder="Airport City">
+                        <input type="text" name="iata_from" required placeholder="Airport IATA-Code">
+                    </label><br> -->
+                    
                     <label for="start_airport">From:</label>
                     <input type="text" id="start_airport" name="start_airport" required class="input" placeholder="Da dove vuoi partire?">
                 </div>
+
                 <div class="mb-6">
+                    <!-- <label>To: 
+                        <input type="text" name="name_to" required placeholder="Airport Name">
+                        <input type="text" name="city_to" required placeholder="Airport City">
+                        <input type="text" name="iata_to" required placeholder="Airport IATA-Code">
+                    </label><br> -->
+
                     <label for="end_airport">To:</label>
                     <input type="text" id="end_airport" name="end_airport" required class="input" placeholder="Dove vuoi andare?">
                 </div>
@@ -79,7 +91,7 @@
         </div>
         <div class="flight-results">
             {% if flights %}
-                <h2>Available Flights</h2>
+                <h2>Available Flights:</h2>
                 <ul>
                     <!-- diversa view se flight singoli o meno -->
                     {% for flight in flights %}
@@ -123,4 +135,14 @@
         </div>
     </body>
 </html>
+
+
+
+
+
+
+
+
+
+
 

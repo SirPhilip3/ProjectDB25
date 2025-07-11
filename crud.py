@@ -1,6 +1,6 @@
 # crud operations for the database
 from database import db
-from model import User , Flight, Airplane, Airline, Ticket, Airport
+from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased 
 from sqlalchemy import text
 from flask import flash, redirect, url_for
@@ -61,6 +61,18 @@ def delete_flight_by_id(flight_id):
     flight = Flight.query.get(flight_id)
     if flight:
         db.session.delete(flight)
+        db.session.commit()
+
+def delete_airplane_by_id(airplane_id):
+    airplane = Airplane.query.get(airplane_id)
+    if airplane:
+        db.session.delete(airplane)
+        db.session.commit()
+
+def delete_ticket_by_id(ticket_id):
+    ticket = Ticket.query.get(ticket_id)
+    if ticket:
+        db.session.delete(ticket)
         db.session.commit()
 
 # Ritorna i voli diretti e/o indiretti filtrati con i parametri corrispondenti
@@ -127,7 +139,7 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
 #     return flights
 
     flights = Flight.query.filter(
-        Flight.departure_airport == departure, 
+        Flight.departure_airport== departure, 
         Flight.destination_airport == arrival).all()
     # Converto i voli diretti in coppiedi voli dove il secondo è None
     flights = [(flight, None) for flight in flights]
@@ -242,49 +254,112 @@ def get_user_tickets(user_id):
         print(f"Error getting user tickets {e}")
         return []
 
-
-def get_airport_by_id(airport_id):
+def get_airline_by_id(airline_id):
     """
-    Ritorna un aeroporto specifico con l'id corrispondente
-    """
-    try:
-        airports = Airport.query.filter_by(id=airport_id).all()
-        return airports
-    except Exception as e:
-        print(f"Error getting airport by id {e}")
-        return None
-
-# Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
-def add_airport(name, city, iata_code):
-    """
-    Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
-    """
-    new_airport = Airport(
-        name=name,
-        city=city,
-        iata_code=iata_code
-    )
-    try :
-        db.session.add(new_airport)
-        db.session.commit()
-        return new_airport
-    except Exception as e:
-        db.session.rollback()  
-        print(f"Error adding airport {e}")
-        return None
-
-
-
-
-def get_all_airports():
-    """
-    ottiene tutti gli aeroporti
+    Ritorna una compagnia aerea specifica con l'id corrispondente
     """
     try:
-        airports = Airport.query.all()
-        return airports
+        airline = Airline.query.get(airline_id)
+        return airline
     except Exception as e:
-         print(f"Error getting airportss {e}")
-         return[]
+        print(f"Error getting airline by id {e}")
+
+def get_airline_statistics(airline_id):
+    """
+    Ritorna le statistiche generali di una compagnia aerea
+    + numero di voli 
+    + numero di aerei
+    + numero di biglietti venduti 
+    + ricavi totali
+    """
+    flights = get_flights_by_airline(airline_id)
+    n_flights = len(flights)
+    
+    airplanes = get_airplanes_by_airline(airline_id)
+    n_airplanes = len(airplanes)
+    
+    tickets = Ticket.query.join(Ticket.flight).filter(Flight.airline_id == airline_id).all()
+    n_tickets = len(tickets)
+
+    total_revenue = sum(ticket.price for ticket in tickets)
+    
+    return n_flights, n_airplanes, n_tickets, total_revenue
+
+def get_most_popular_routes(airline_id, limit=10):
+
+    routes = get_flights_by_airline(airline_id)
+    # tickets_for_routes = 
+    
+    
+    return None
+
+def get_flight_passengers_statistics():
 
 
+    return None
+
+#! non usato 
+# def search_airport(name, city, iata_code):
+#     """
+#     Cerca un aeroporto in base al nome, città o codice IATA
+#     """
+#     try:
+#         query = Airport.query.filter_by(
+#             name = name,
+#             city = city,
+#             iata_code = iata_code
+#         ).first()
+#         return query
+#     except Exception as e:
+#         print(f"Error searching airport {e}")
+
+# def search_airport_by_iata(iata_code):
+#     """
+#     Cerca un aeroporto in base al codice IATA
+#     """
+#     try:
+#         query = Airport.query.filter_by(iata_code=iata_code).first()
+#         return query
+#     except Exception as e:
+#         print(f"Error searching airport by IATA {e}")
+
+# def get_airport_by_id(airport_id):
+#     """
+#     Ritorna un aeroporto specifico con l'id corrispondente
+#     """
+#     try:
+#         airports = Airport.query.filter_by(id=airport_id).all()
+#         return airports
+#     except Exception as e:
+#         print(f"Error getting airport by id {e}")
+#         return None
+
+# # Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
+# def add_airport(name, city, iata_code):
+#     """
+#     Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
+#     """
+#     new_airport = Airport(
+#         name=name,
+#         city=city,
+#         iata_code=iata_code
+#     )
+#     try :
+#         db.session.add(new_airport)
+#         db.session.commit()
+#         return new_airport
+#     except Exception as e:
+#         db.session.rollback()  
+#         print(f"Error adding airport {e}")
+#         return None
+
+# def get_all_airports():
+#     """
+#     ottiene tutti gli aeroporti
+#     """
+#     try:
+#         airports = Airport.query.all()
+#         return airports
+#     except Exception as e:
+#          print(f"Error getting airports {e}")
+#          return[]

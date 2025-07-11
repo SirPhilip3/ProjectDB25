@@ -25,6 +25,22 @@ def hello_world():
     direct = False # False di default
     # se l'utente ha cliccato search in base.html
     if request.method == 'POST':
+        #! ricerca aereoporti non usata
+        # departure_airport_name = request.form['name_from']
+        # departure_airport_city = request.form['city_from']
+        # departure_airport_iata = request.form['iata_from']
+
+        # arrival_airport_name = request.form['name_to']
+        # arrival_airport_city = request.form['city_to']
+        # arrival_airport_iata = request.form['iata_to']
+
+        # departure_airport = search_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
+        # arrival_airport = search_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
+        # 
+        # if not departure_airport or not arrival_airport:
+        #     print("One or both airports not found, please check the input.")
+        #     redirect(url_for('hello_world'))
+        
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
         direct = request.form.get('direct_flight') == 'on' # True or False
@@ -37,26 +53,6 @@ def hello_world():
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
         flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by)
     return render_template("base.html", flights=flights, user=current_user, direct_flight=direct)
-
-# @app.route("/", methods=['GET', 'POST'])
-# def hello_world():
-#     #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
-#     flights_diretti = []
-#     flights_indiretti = []
-#     # se l'utente ha cliccato search in base.html
-#     if request.method == 'POST' :
-#         from_ = request.form.get('start_airport') 
-#         to_ = request.form.get('end_airport')
-#         class_type = request.form.get('flight_class') # Economy, Business, First Class 
-        
-#         min_price = request.form.get('min_price')
-#         max_price = request.form.get('max_price') 
-#         sort_by = request.form.get('sort_by') 
-        
-#         # funzione per cercare i voli , deve tornare una lista di voli con flight id
-#         flights_dir = search_flight(from_, to_, True, class_type, min_price, max_price, sort_by)
-#         flights_ind = search_flight(from_, to_, False, class_type, min_price, max_price, sort_by)
-#     return render_template("base.html", flights_diretti=flights_dir, flights_indiretti=flights_ind ,user=current_user, direct_flight=direct)
 
 # get information about the user (flights tikets etcc)
 #! maybe inutile
@@ -81,11 +77,16 @@ def airline_profile(airline_id):
     if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
         flights = get_flights_by_airline(current_user.airline_profile.id)
+        airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
 
-        # per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
+        # DEGUB
+        n_flights , n_airplanes, n_tickets , tot_revenue = get_airline_statistics(current_user.airline_profile.id)
+        print(f"Airline {current_user.airline_profile.id} has {n_flights} flights, {n_airplanes} airplanes, {n_tickets} tickets sold, total revenue: {tot_revenue}")
+
+        # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
         # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
         # aggiunge headers per disabilitare la cache
-        response = make_response(render_template('airline_profile.html', flights=flights))
+        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         
         return response
@@ -99,7 +100,25 @@ def delete_flight():
     flight_id = request.form.get('flight_id')
     if current_user.role == UserRole.AIRLINE:
         delete_flight_by_id(flight_id)
-        return redirect(url_for('airline_profile'))
+        return redirect(url_for('airline_profile', airline_id=current_user.airline_profile.id))
+
+# Per eliminare un aereo come compagnia aerea
+@app.route("/delete_airplane", methods=['POST'])
+@login_required
+def delete_airplane():
+    airplane_id = request.form.get('airplane_id')
+    if current_user.role == UserRole.AIRLINE:
+        delete_airplane_by_id(airplane_id)
+        return redirect(url_for('airline_profile', airline_id=current_user.airline_profile.id))
+
+# Per eliminare un aereo come compagnia aerea
+@app.route("/delete_ticket", methods=['POST'])
+@login_required
+def delete_ticket():
+    ticket_id = request.form.get('ticket_id')
+    if current_user.role == UserRole.PASSENGER:
+        delete_ticket_by_id(ticket_id)
+        return redirect(url_for('user', user_id=current_user.id))
 
 # Per aggiungere una tratta come compagnia aerea
 @app.route("/add_flight", methods=['GET', 'POST'])
@@ -108,19 +127,30 @@ def add_flight_page():
     if current_user.role == UserRole.AIRLINE:
 
         if request.method == 'POST':
-            #! per ora gli aereoporti sono strighe
+            #! se volessimo usare la tabella ereoporti
+            # departure_airport_name = request.form['name_from']
+            # departure_airport_city = request.form['city_from']
+            # departure_airport_iata = request.form['iata_from']
+
+            # arrival_airport_name = request.form['name_to']
+            # arrival_airport_city = request.form['city_to']
+            # arrival_airport_iata = request.form['iata_to']
+        
+            # departure_airport = search_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
+            # if not departure_airport :
+            #     print("Departure airport not found, adding it.")
+            #     departure_airport=add_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
+            
+            # arrival_airport = search_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
+            # if not arrival_airport :
+            #     print("Departure airport not found, adding it.")
+            #     arrival_airport=add_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
+
             departure_airport = request.form['from']
             arrival_airport = request.form['to']
-
-            departure_time = request.form['departure_time']
-            arrival_time = request.form['arrival_time']
-            #! meglio usare un datetime picker per evitare errori di formato
-            # To convert date and time strings to datetime objects, we can use the datetime module
-            flight_date = date.today() 
             
-            # Create datetime objects
-            departure_time = datetime.combine(flight_date, datetime.strptime(departure_time, '%H:%M').time())
-            arrival_time = datetime.combine(flight_date, datetime.strptime(arrival_time, '%H:%M').time())
+            departure_time = datetime.fromisoformat(request.form['departure_time'])
+            arrival_time = datetime.fromisoformat(request.form['arrival_time'])
             
             economy_price = float(request.form['price_economy'])
             business_price = float(request.form['price_business'])
@@ -140,7 +170,7 @@ def add_flight_page():
                         })
                     else :
                         print(f"Extra {value} has no price, skipping.")
-            #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
+            
             add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
     
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)

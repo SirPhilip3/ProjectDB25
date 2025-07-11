@@ -9,7 +9,8 @@
         <script src="https://cdn.tailwindcss.com"></script>
     </head>
     <body>
-        <h1>Your Tickets</h1>
+        <a href="{{ url_for('hello_world') }}"> Cerca un volo </a><br><br>
+        <h1>Your Tickets:</h1>
         {% if tickets %}
             {% for ticket in tickets %}
                 <div class="ticket">
@@ -27,6 +28,12 @@
                         {% else %}
                             None
                         {% endif %}
+                    <p> <form action="{{ url_for('delete_ticket') }}" method="POST" style="display:inline;">
+                            <input type="hidden" name="ticket_id" value="{{ ticket.id }}">
+                            <button type="submit">Cancel ticket</button>
+                        </form>
+                    </p>
+                    <br><br>
                 </div>
             {% endfor %}
         {% else %}

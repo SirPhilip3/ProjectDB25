@@ -1,4 +1,3 @@
-
 <html>
 <head>
   <title>Add Flight</title>
@@ -7,10 +6,20 @@
 </head>
 <body>
   <form method="post">
+    <!-- <label>From: 
+      <input type="text" name="name_from" required placeholder="Airport Name">
+      <input type="text" name="city_from" required placeholder="Airport City">
+      <input type="text" name="iata_from" required placeholder="Airport IATA-Code">
+    </label><br>
+    <label>To: 
+      <input type="text" name="name_to" required placeholder="Airport Name">
+      <input type="text" name="city_to" required placeholder="Airport City">
+      <input type="text" name="iata_to" required placeholder="Airport IATA-Code">
+    </label><br> -->
     <label>From: <input type="text" name="from" required></label><br>
     <label>To: <input type="text" name="to" required></label><br>
-    <label>Orario Partenza: <input type="time" name="departure_time" required></label><br>
-    <label>Orario Arrivo: <input type="time" name="arrival_time" required></label><br>
+    <label>Data e Orario Partenza (UCT): <input type="datetime-local" name="departure_time" required></label><br>
+    <label>Data e Orario Arrivo (UCT): <input type="datetime-local" name="arrival_time" required></label><br>
     
     <h4>Aereo assegnato</h4>
     <select name="airplane_id" id="airplane-select" onchange="updateAirplaneInfo()" required>
@@ -42,7 +51,7 @@
       <input type="text" name="extra_name_1" placeholder="Extra Name">
       <input type="number" name="extra_price_1" placeholder="Extra Price">
     </div>
-    <button type="button" onclick="addExtra()">Add New</button>
+    <button type="button" onclick="addExtra()">Add New Extra</button>
     
 
     <br><br>

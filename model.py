@@ -29,7 +29,7 @@ class User(UserMixin, db.Model):
     # bookings: Mapped[list["Booking"]] = relationship(back_populates="passenger")
 
     def __repr__(self):
-        return f"<User {self.username} (Role: {self.role.value})>"
+        return f"<User {self.email} (Role: {self.role.value})>"
 
 class Airline(db.Model):
     __tablename__ = 'airlines'
@@ -73,16 +73,19 @@ class Airplane(db.Model):
     def __repr__(self):
         return f"<Airplane {self.model} Capacity {self.capacity}>"
 
-class Airport(db.Model):
-    __tablename__ = 'airports'
+#! INUTILE
+#? usata se volessimo modellare gli aereoporti
+# class Airport(db.Model):
+#     __tablename__ = 'airports'
     
-    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name: Mapped[str] = mapped_column(String(150), nullable=False)
-    city: Mapped[str] = mapped_column(String(150), nullable=False)
-    iata_code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False) # es. "FCO" per Fiumicino
+#     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+#     #? name maybe unique
+#     name: Mapped[str] = mapped_column(String(150), nullable=False)
+#     city: Mapped[str] = mapped_column(String(150), nullable=False)
+#     iata_code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False) # es. "FCO" per Fiumicino
 
-    def __repr__(self):
-        return f"<Airport {self.name} ({self.iata_code})>"
+#     def __repr__(self):
+#         return f"<Airport {self.name} , {self.city} ({self.iata_code})>"
 
 class Flight(db.Model):
     __tablename__ = 'flights'
@@ -90,7 +93,7 @@ class Flight(db.Model):
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     departure_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
     arrival_time: Mapped[DateTime] = mapped_column(DateTime, nullable=False)
-    #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa
+
     departure_airport: Mapped[str] = mapped_column(String(100), nullable=False)
     destination_airport: Mapped[str] = mapped_column(String(100), nullable=False)
     
@@ -102,20 +105,22 @@ class Flight(db.Model):
     # Chiavi esterne
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
     airplane_id: Mapped[str] = mapped_column(ForeignKey('airplanes.id'), nullable=False)
-    #!! Importante: per ora non modello gli aereoporti attraverso la tabella ma solo con una stringa , per ora rimane nullabile
-    departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
-    destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=True)
+
     # Relazioni
     airline: Mapped["Airline"] = relationship(back_populates="flights") 
-    # departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
-    # destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
     tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight") 
 
     extras: Mapped[dict] = mapped_column(JSON, nullable=True) # Lista di extra disponibili [{"name":name, "price": price}, ...]
 
+    #! non usato (se volessimo per usare la tabella airport)
+    # departure_airport: Mapped["Airport"] = relationship(foreign_keys=[departure_airport_id])
+    # destination_airport: Mapped["Airport"] = relationship(foreign_keys=[destination_airport_id])
+    # departure_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
+    # destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
+
     # Constraints
     table_args = (
-        CheckConstraint('departure_airport_id != destination_airport_id', name='check_different_airports'),
+        CheckConstraint('departure_airport != destination_airport', name='check_different_airports'),
         CheckConstraint('arrival_time > departure_time', name='check_arrival_after_departure'),
         CheckConstraint('economy_price >= 0', name='check_non_negative_economy_price'),
         CheckConstraint('business_price >= 0', name='check_non_negative_business_price'),
@@ -187,3 +192,6 @@ class Ticket(db.Model):
     
     # Relazioni
     flight: Mapped["Flight"] = relationship(back_populates="tickets")
+
+    def __repr__(self):
+        return f"<Ticket {self.id} for flight {self.flight_id} - {self.ticket_class} class , Passenger {self.passenger_id}>"
