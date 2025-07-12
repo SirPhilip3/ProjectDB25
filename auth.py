@@ -27,9 +27,10 @@ def login ():
             login_user(user)
             flash('Login successful!')
             if user.role == UserRole.AIRLINE:
-                #! airline_id ancora da definire
                 return redirect(url_for('airline_profile', airline_id=user.id))
             elif user.role == UserRole.PASSENGER:
+                #! Fix qunado cerci un volo e non sei loggato crasha
+                #! se sei airline non dovresti poter cliccare select flight
                 #? redirect to user profile or base (dove ci sono i voli)
                 url = request.referrer
                 if 'flight' in url: # se arriva richiest da flight_details dopo aver fatto login ritorna alla pagina del volo che si stava visualizzando

@@ -19,3 +19,17 @@ CREATE OR REPLACE TRIGGER trigger_overlap
 BEFORE INSERT ON Flights
 FOR EACH ROW
 EXECUTE FUNCTION prevent_airplane_overlap();#
+
+-- test trigger per notifiche in tempo reale socketio
+CREATE OR REPLACE FUNCTION socket_test()
+RETURNS TRIGGER AS $$
+BEGIN
+    PERFORM pg_notify('new_airplane', NEW.id::text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;#
+
+CREATE OR REPLACE TRIGGER trigger_socket_test
+BEFORE INSERT ON airplanes
+FOR EACH ROW
+EXECUTE FUNCTION socket_test();#

@@ -21,7 +21,6 @@ BEGIN
     WHERE t.flight_id = NEW.flight_id 
     AND t.ticket_class = NEW.ticket_class
    
-    
     -- Controlla se ci sono posti disponibili
     IF sold_seats >= airplane_seats THEN
         RAISE EXCEPTION 'No seats available for class % on flight %', NEW.ticket_class, NEW.flight_id;
@@ -37,5 +36,4 @@ $$ LANGUAGE plpgsql;
 --     BEFORE INSERT ON Flights
 --     FOR EACH ROW
 --     EXECUTE FUNCTION check_seat_availability();#
-
 

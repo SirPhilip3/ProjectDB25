@@ -69,6 +69,8 @@ class Airplane(db.Model):
     
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
     airline: Mapped["Airline"] = relationship(back_populates="airplanes")
+    # Per eliminare "a cascata" i flight collegati a questo aereo
+    flights: Mapped[list["Flight"]] = relationship(back_populates="airplane", cascade="all, delete-orphan", passive_deletes=True)
 
     def __repr__(self):
         return f"<Airplane {self.model} Capacity {self.capacity}>"
@@ -104,11 +106,12 @@ class Flight(db.Model):
     
     # Chiavi esterne
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
-    airplane_id: Mapped[str] = mapped_column(ForeignKey('airplanes.id'), nullable=False)
+    airplane_id: Mapped[str] = mapped_column(ForeignKey('airplanes.id', ondelete='CASCADE'),nullable=False)
 
     # Relazioni
     airline: Mapped["Airline"] = relationship(back_populates="flights") 
-    tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight") 
+    tickets: Mapped[list["Ticket"]] = relationship(back_populates="flight",cascade="all, delete-orphan", passive_deletes=True)
+    airplane: Mapped["Airplane"] = relationship(back_populates="flights")
 
     extras: Mapped[dict] = mapped_column(JSON, nullable=True) # Lista di extra disponibili [{"name":name, "price": price}, ...]
 
@@ -188,7 +191,7 @@ class Ticket(db.Model):
     
     passenger_id: Mapped[str] = mapped_column(ForeignKey('users.id'), nullable=False)
     # Chiavi esterne
-    flight_id: Mapped[int] = mapped_column(ForeignKey('flights.id'), nullable=False)
+    flight_id: Mapped[int] = mapped_column(ForeignKey('flights.id', ondelete='CASCADE'), nullable=False)
     
     # Relazioni
     flight: Mapped["Flight"] = relationship(back_populates="tickets")

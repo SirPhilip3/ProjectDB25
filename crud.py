@@ -282,7 +282,7 @@ def get_airline_statistics(airline_id):
     n_tickets = len(tickets)
 
     total_revenue = sum(ticket.price for ticket in tickets)
-    
+
     return n_flights, n_airplanes, n_tickets, total_revenue
 
 def get_most_popular_routes(airline_id, limit=10):
