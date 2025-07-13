@@ -7,6 +7,9 @@ from crud import *
 from model import UserRole
 from datetime import datetime, date
 
+from socket_test import *
+from socket_io_init import socketio
+
 with app.app_context():
     db.create_all()
     carica_triggers()
@@ -83,10 +86,19 @@ def airline_profile(airline_id):
         n_flights , n_airplanes, n_tickets , tot_revenue = get_airline_statistics(current_user.airline_profile.id)
         print(f"Airline {current_user.airline_profile.id} has {n_flights} flights, {n_airplanes} airplanes, {n_tickets} tickets sold, total revenue: {tot_revenue}")
 
+
+        top_routes = get_airline_top_routes(current_user.airline_profile.id)
+        class_distribution = get_airline_class_distribution(current_user.airline_profile.id)
+
+
+        
+
+
+
         # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
         # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
         # aggiunge headers per disabilitare la cache
-        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes))
+        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes ,     class_distribution=class_distribution,top_routes=top_routes))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         
         return response
@@ -203,9 +215,12 @@ def flight_details(flight_id):
     # deve fare una query per prendere i dettagli del volo
     flight_details = get_flight_by_id(str(flight_id))
     message = None
+
     if current_user.role != UserRole.PASSENGER:
         flash('Only passengers can book tickets.', 'error')
         return redirect(url_for('hello_world'))
+
+    available_tickets = get_remaining_ticket_count_by_flight(flight_id)
 
     if request.method == 'POST':
         flight_id = request.form.get('flight_id')
@@ -240,7 +255,12 @@ def flight_details(flight_id):
             return redirect(url_for('hello_world'))
         else:
             flash(f'Booking failed: {message}', 'error')
-            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message)
+            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets)
 
-    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message)
+    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets)
 
+
+
+if __name__ == '__main__':
+    # Use socketio.run() instead of app.run() to enable Socket.IO
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)

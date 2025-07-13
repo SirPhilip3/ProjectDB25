@@ -2,7 +2,7 @@
 from database import db
 from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased 
-from sqlalchemy import text
+from sqlalchemy import text,func,desc
 from flask import flash, redirect, url_for
 from datetime import timedelta
 
@@ -210,8 +210,8 @@ def get_flights_by_airline(airline_id):
 
 # Aggiunge un biletto al database
 def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_extras=None):
-    #! prob da sostituire con un unique su seat_number
-    if not Ticket.query.filter_by(flight_id=flight_id, seat_number=seat_number).first():
+
+    try:
         selected_flight = Flight.query.get(flight_id)
         price = 0.0
         if ticket_class == 'economy':
@@ -237,7 +237,8 @@ def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_ext
         db.session.add(new_ticket)
         db.session.commit()
         return True , None 
-    else :
+    except Exception as e:
+        db.session.rollback()
         return False , "Seat already booked."
 
 def get_airplanes_by_airline(airline_id):
@@ -285,18 +286,102 @@ def get_airline_statistics(airline_id):
 
     return n_flights, n_airplanes, n_tickets, total_revenue
 
-def get_most_popular_routes(airline_id, limit=10):
+#! #! da testare
+def get_airline_top_routes(airline_id, limit=10):
+    """
+    Ottiene le tratte più richieste di una compagnia aerea
+    """
+    try:
+        # Query per ottenere le rotte con più passeggeri
+        route_stats = db.session.query(
+            Flight.departure_airport,
+            Flight.destination_airport,
+            func.count(Ticket.id).label('passengers'),
+       
+        ).join(
+            Ticket, Flight.id == Ticket.flight_id
+        ).filter(
+            Flight.airline_id == airline_id,  
+        ).group_by(
+            Flight.departure_airport,
+            Flight.destination_airport
+        ).order_by(
+            desc('passengers')
+        ).limit(limit).all()
+        
+        top_routes = []
+        for route in route_stats:
+            top_routes.append({
+                'route': f"{route.departure_airport} → {route.destination_airport}",
+                'passengers': route.passengers,
+               
+            })
+        
+        return top_routes
+        
+    except Exception as e:
+        print(f"Error getting top routes: {e}")
+        return []
 
-    routes = get_flights_by_airline(airline_id)
-    # tickets_for_routes = 
-    
-    
-    return None
-
-def get_flight_passengers_statistics():
 
 
-    return None
+#! da testare
+def get_airline_class_distribution(airline_id):
+    """
+    Ottiene la distribuzione dei passeggeri per classe
+    """
+    try:
+        class_stats = db.session.query(
+            Ticket.ticket_class,
+            func.count(Ticket.id).label('count'),
+
+            
+        ).join(
+            Flight, Ticket.flight_id == Flight.id
+        ).filter(
+            Flight.airline_id == airline_id,
+        ).group_by(
+            Ticket.ticket_class
+        ).all()
+        
+        distribution = {}
+        for stat in class_stats:
+            distribution[stat.ticket_class] = {
+                'passengers': stat.count,
+            }
+        
+        return distribution
+        
+    except Exception as e:
+        print(f"Error getting class distribution: {e}")
+        return {}
+
+
+def get_remaining_ticket_count_by_flight(flight_id):
+    """
+    Ottiene il numero rimanente di biglietti venduti per un volo specifico
+    """
+
+    try:
+        flight_id = str(flight_id)
+        airplane = Flight.query.get(flight_id).airplane
+        tickets = Ticket.query.join(Ticket.flight).filter(Flight.id == flight_id).all()
+        n_economy , n_business, n_first_class = 0, 0, 0
+        for ticket in tickets:
+            if ticket.ticket_class == 'economy':
+                n_economy += 1
+            elif ticket.ticket_class == 'business':
+                n_business += 1
+            elif ticket.ticket_class == 'first_class':
+                n_first_class += 1
+        return {
+            'economy': airplane.economy_seats-n_economy,
+            'business': airplane.business_seats-n_business,
+            'first_class': airplane.first_class_seats - n_first_class,
+            'total': airplane.capacity - len(tickets)
+        }
+    except Exception as e:
+        print(f"Error getting ticket count by flight {e}")
 
 #! non usato 
 # def search_airport(name, city, iata_code):

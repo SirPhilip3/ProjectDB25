@@ -8,6 +8,7 @@
         <title>Flight Detail</title>
         <meta name='viewport' content='width=device-width, initial-scale=1'>
         <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     </head>
     <body>
         <!-- dettagli per il volo selezionato -->
@@ -23,6 +24,17 @@
                 <p><strong>To:</strong> {{ flight.destination_airport }}</p>
                 <p><strong>Departure:</strong> {{ flight.departure_time }}</p>
                 <p><strong>Arrival:</strong> {{ flight.arrival_time }}</p>
+            </div>
+        </div>
+
+        <div class="seat-info mb-4">
+            <h3>Seat Availability</h3>
+            <p><strong>Total Remaining Seats:</strong> <span id="total-remaining-seats">{{available_tickets.total}}</span></p>
+            
+            <div class="class-breakdown">
+                <p>Economy: <span id="economy-seats">{{available_tickets.economy}}</span> remaining</p>
+                <p>Business: <span id="business-seats">{{available_tickets.business}}</span> remaining</p>
+                <p>First Class: <span id="first-class-seats">{{available_tickets.first_class}}</span> remaining</p>
             </div>
         </div>
 
@@ -77,6 +89,43 @@
             'business': {{ flight.business_price }},
             'first_class': {{ flight.first_class_price }}
         };
+
+        // Socket.io connection
+        const socket = io.connect('http://' + document.domain + ':' + location.port);
+        
+        // Join room quando l'utente visita la pagina del volo
+        socket.emit('join_flight', {flight_id: '{{ flight_id }}'});
+
+        // Ascolta aggiornamenti sui posti
+        socket.on('seat_update', function(data) {
+            console.log('Seat update for flight:', data.flight_id, data.data);
+            // Aggiorna UI dei posti disponibili
+            updateSeatAvailability(data.data);
+        });
+
+        // Leave room quando l'utente lascia la pagina
+        // document.addEventListener('visibilitychange', function() {
+        //     if (document.hidden) {
+        //         console.log('Leaving flight room:', '{{ flight_id }}');
+        //         socket.emit('leave_flight', {flight_id: '{{ flight_id }}'});
+        //     }
+        // });
+    
+        // window.addEventListener('beforeunload', function() {
+            
+        // });
+
+        function updateSeatAvailability(data) {
+            const economyElement = document.getElementById('economy-seats');
+            const businessElement = document.getElementById('business-seats');
+            const firstClassElement = document.getElementById('first-class-seats');
+            const totalSeatsElement = document.getElementById('total-remaining-seats');
+            
+            if (economyElement) economyElement.textContent = data.economy_available;
+            if (businessElement) businessElement.textContent = data.business_available;
+            if (firstClassElement) firstClassElement.textContent = data.first_class_available;
+            if (totalSeatsElement) totalSeatsElement.textContent = data.total_available;
+        }
 
         function updateTotalPrice() {
             // Ottieni la classe selezionata

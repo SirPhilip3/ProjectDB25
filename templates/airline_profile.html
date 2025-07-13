@@ -75,6 +75,46 @@
                 <p>No Airplanes.</p>
             {% endif %}
         </div>
+
+
+        <h3>Distribuzione passeggeri per classe</h3>
+<div>
+    {% if class_distribution %}
+        <ul>
+            {% for ticket_class, data in class_distribution.items() %}
+                <li>
+                    Classe: {{ ticket_class }} — Passeggeri: {{ data.passengers }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nessun dato disponibile.</p>
+    {% endif %}
+</div>
+
+
+
+<h3>Top 10 Tratte più richieste</h3>
+<div>
+    {% if top_routes %}
+        <ul>
+            {% for route in top_routes %}
+                <li>
+                    Rotta: {{ route.route }} — Passeggeri: {{ route.passengers }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nessuna tratta disponibile.</p>
+    {% endif %}
+</div>
+
+
+
+
+
+
+
         <button onclick="window.location.href='{{ url_for('add_airplane_page') }}'">ADD NEW AIRPLANE</button><br>
 
         <a href="{{ url_for('hello_world') }}"> Cerca un volo </a>

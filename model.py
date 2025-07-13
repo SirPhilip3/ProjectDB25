@@ -184,7 +184,7 @@ class Ticket(db.Model):
     __tablename__ = 'tickets'
     
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    seat_number: Mapped[str] = mapped_column(String(10), nullable=False)
+    seat_number: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)  # Numero di posto unico
     ticket_class: Mapped[str] = mapped_column(String(20), nullable=False) # 'economy', 'business', 'first'
     price: Mapped[float] = mapped_column(Float, nullable=False)
     selected_extras: Mapped[dict] = mapped_column(JSON, nullable=True)  # Lista di dizionari per gli extra selezionati

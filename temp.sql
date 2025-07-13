@@ -31,9 +31,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 
--- -- Trigger che si attiva PRIMA di inserire una prenotazione
--- CREATE OR REPLACE TRIGGER trigger_check_seat_availability
---     BEFORE INSERT ON Flights
---     FOR EACH ROW
---     EXECUTE FUNCTION check_seat_availability();#
+-- Trigger che si attiva PRIMA di inserire una prenotazione
+CREATE OR REPLACE TRIGGER trigger_check_seat_availability
+    BEFORE INSERT ON Flights
+    FOR EACH ROW
+    EXECUTE FUNCTION check_seat_availability();#
 
