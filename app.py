@@ -87,18 +87,15 @@ def airline_profile(airline_id):
         flights = get_flights_by_airline(current_user.airline_profile.id)
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
 
-        # DEGUB
         n_flights , n_airplanes, n_tickets , tot_revenue = get_airline_statistics(current_user.airline_profile.id)
-        print(f"Airline {current_user.airline_profile.id} has {n_flights} flights, {n_airplanes} airplanes, {n_tickets} tickets sold, total revenue: {tot_revenue}")
 
         top_routes = get_airline_top_routes(current_user.airline_profile.id)
         class_distribution = get_airline_class_distribution(current_user.airline_profile.id)
 
-
         # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
         # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
         # aggiunge headers per disabilitare la cache
-        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes ,     class_distribution=class_distribution,top_routes=top_routes))
+        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes, class_distribution=class_distribution, top_routes=top_routes, n_flights=n_flights, n_airplanes=n_airplanes, n_tickets=n_tickets, tot_revenue=tot_revenue))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         
         return response
@@ -228,8 +225,8 @@ def flight_details(flight_id):
         seat_number = request.form.get('seat_number')
 
         selected_extras = []
-        for key, value in request.form.items():
-            if key == "selected_extras" and value:
+        for value in request.form.getlist('selected_extras[]'):
+            if value:
                 name , cost = value.split('|')
                 if name and cost:
                     selected_extras.append({

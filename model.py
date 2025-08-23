@@ -2,7 +2,7 @@ import enum
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from sqlalchemy.orm import Mapped, mapped_column , relationship
-from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime ,CheckConstraint ,Index, JSON
+from sqlalchemy import String , ForeignKey, Integer , Table, LargeBinary, Float, Enum, DateTime ,CheckConstraint ,Index, JSON, UniqueConstraint
 from database import db
 import uuid
 
@@ -184,7 +184,7 @@ class Ticket(db.Model):
     __tablename__ = 'tickets'
     
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    seat_number: Mapped[str] = mapped_column(String(10), nullable=False, unique=True)  # Numero di posto unico
+    seat_number: Mapped[str] = mapped_column(String(10), nullable=False)  # Numero di posto unico
     ticket_class: Mapped[str] = mapped_column(String(20), nullable=False) # 'economy', 'business', 'first'
     price: Mapped[float] = mapped_column(Float, nullable=False)
     selected_extras: Mapped[dict] = mapped_column(JSON, nullable=True)  # Lista di dizionari per gli extra selezionati
@@ -195,6 +195,11 @@ class Ticket(db.Model):
     
     # Relazioni
     flight: Mapped["Flight"] = relationship(back_populates="tickets")
+    
+    #!
+    __table_args__ = (
+        UniqueConstraint('seat_number', 'flight_id', name='unique_seat_per_flight'),
+    )
 
     def __repr__(self):
         return f"<Ticket {self.id} for flight {self.flight_id} - {self.ticket_class} class , Passenger {self.passenger_id}>"

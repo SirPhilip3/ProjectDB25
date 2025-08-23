@@ -16,6 +16,92 @@
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
         </div>
+        
+        <!-- Analytics Section -->
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3"><i class="fas fa-chart-bar"></i> Statistics</h4>
+            </div>
+             <div class="col-12 mb-4">
+                <div class="row g-3">
+                    <div class="col-md-3 col-6">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-1"><i class="fas fa-plane"></i> Flights</h6>
+                                <span class="fs-4 fw-bold">{{ n_flights }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-1"><i class="fas fa-jet-fighter"></i> Airplanes</h6>
+                                <span class="fs-4 fw-bold">{{ n_airplanes }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-1"><i class="fas fa-ticket-alt"></i> Tickets Sold</h6>
+                                <span class="fs-4 fw-bold">{{ n_tickets }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="card text-center shadow-sm">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-1"><i class="fas fa-euro-sign"></i> Total Revenue</h6>
+                                <span class="fs-4 fw-bold">€{{ tot_revenue }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="auth-card fade-in-up mb-4">
+                    <div class="auth-header">
+                        <h5><i class="fas fa-users"></i> Passenger Distribution by Class</h5>
+                    </div>
+                    <div class="p-3">
+                        {% if class_distribution %}
+                            <ul class="list-group">
+                                {% for ticket_class, data in class_distribution.items() %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Class: {{ ticket_class }}
+                                        <span class="badge bg-primary rounded-pill">{{ data.passengers }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No data available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="auth-card fade-in-up mb-4">
+                    <div class="auth-header">
+                        <h5><i class="fas fa-route"></i> Top 10 Most Requested Routes</h5>
+                    </div>
+                    <div class="p-3">
+                        {% if top_routes %}
+                            <ul class="list-group">
+                                {% for route in top_routes %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Route: {{ route.route }}
+                                        <span class="badge bg-success rounded-pill">{{ route.passengers }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted">No routes available.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Flights Section -->
         <div class="auth-card fade-in-up mb-4">
@@ -67,7 +153,7 @@
                 </button>
             </div>
         </div>
-<!-- Airplanes Section -->
+        <!-- Airplanes Section -->
         <div class="auth-card fade-in-up mb-4">
             <div class="auth-header">
                 <h4><i class="fas fa-plane"></i> My Airplanes</h4>
@@ -111,52 +197,6 @@
                 <button onclick="window.location.href='{{ url_for('add_airplane_page') }}'" class="btn btn-primary mt-2">
                     <i class="fas fa-plus"></i> Add New Airplane
                 </button>
-            </div>
-        </div>
-
-        <!-- Analytics Section -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="auth-card fade-in-up mb-4">
-                    <div class="auth-header">
-                        <h5><i class="fas fa-users"></i> Passenger Distribution by Class</h5>
-                    </div>
-                    <div class="p-3">
-                        {% if class_distribution %}
-                            <ul class="list-group">
-                                {% for ticket_class, data in class_distribution.items() %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Class: {{ ticket_class }}
-                                        <span class="badge bg-primary rounded-pill">{{ data.passengers }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No data available.</p>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-<div class="col-md-6">
-                <div class="auth-card fade-in-up mb-4">
-                    <div class="auth-header">
-                        <h5><i class="fas fa-route"></i> Top 10 Most Requested Routes</h5>
-                    </div>
-                    <div class="p-3">
-                        {% if top_routes %}
-                            <ul class="list-group">
-                                {% for route in top_routes %}
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        Route: {{ route.route }}
-                                        <span class="badge bg-success rounded-pill">{{ route.passengers }}</span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-muted">No routes available.</p>
-                        {% endif %}
-                    </div>
-                </div>
             </div>
         </div>
 

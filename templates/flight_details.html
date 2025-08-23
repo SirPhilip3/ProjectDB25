@@ -98,7 +98,7 @@
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox"
                                                         id="extra_{{ loop.index }}"
-                                                        name="selected_extras"
+                                                        name="selected_extras[]"
                                                         value="{{ extra.name }}|{{ extra.price }}"
                                                         onchange="updateTotalPrice()">
                                                     <label class="form-check-label" for="extra_{{ loop.index }}">
