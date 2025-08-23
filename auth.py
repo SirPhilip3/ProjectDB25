@@ -32,10 +32,13 @@ def login ():
                 #! Fix qunado cerci un volo e non sei loggato crasha
                 #! se sei airline non dovresti poter cliccare select flight
                 #? redirect to user profile or base (dove ci sono i voli)
-                url = request.referrer
-                if 'flight' in url: # se arriva richiest da flight_details dopo aver fatto login ritorna alla pagina del volo che si stava visualizzando
-                    # idealmente dovrebbe rimanere nello stato in cui si trovava prima del login
-                    return redirect(url_for('flight_details', flight_id=request.args.get('flight_id')))
+                next_page = request.args.get('next')
+                if next_page:
+                    return redirect(next_page)
+                # url = request.referrer
+                # if 'flight' in url: # se arriva richiest da flight_details dopo aver fatto login ritorna alla pagina del volo che si stava visualizzando
+                #     # idealmente dovrebbe rimanere nello stato in cui si trovava prima del login
+                #     return redirect(url_for('flight_details', flight_id=request.args.get('flight')))
                 return redirect(url_for('hello_world')) # ritorna alla lista dei voli (potremmo far tornare a pagina specifica dello user)
         else:
             flash('Invalid username or password')

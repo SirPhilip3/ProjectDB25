@@ -10,9 +10,9 @@
     <link href="{{ url_for('static', filename='static/style.css') }}" rel="stylesheet">
 </head>
 <!-- margin top per evitare che la barra vadi sopra al testo -->
-<body style="margin-top: 80px;">
+<body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('hello_world') }}">
                 <i class="fas fa-plane-departure"></i> Flight Finder
@@ -90,7 +90,7 @@
                                 <label class="form-label d-block"><i class="fas fa-euro-sign"></i> Price Range</label>
                                 <div class="row align-items-center">
                                     <!-- Min price -->
-                                    <div class="col-5">
+                                    <div class="col-6">
                                         <div class="input-group mb-2">
                                             <span class="input-group-text">Min</span>
                                             <input type="number" class="form-control" id="min_price" name="min_price" value="0" min="0">
@@ -98,11 +98,8 @@
                                         <input type="range" class="form-range" id="price_slider_min" min="0" max="2000" step="10" value="0"
                                             oninput="syncPriceInputs()">
                                     </div>
-                                    <div class="col-2 text-center">
-                                        <span class="fw-bold">–</span>
-                                    </div>
                                     <!-- Max price -->
-                                    <div class="col-5">
+                                    <div class="col-6">
                                         <div class="input-group mb-2">
                                             <span class="input-group-text">Max</span>
                                             <input type="number" class="form-control" id="max_price" name="max_price" value="1000" min="0">
@@ -226,7 +223,7 @@
                                         <strong>Arrival:</strong> {{ flight[0].arrival_time }}<br>
                                         <strong>Price:</strong> €{{ flight[0].selected_price }}
                                     </p>
-                                    {% if current_user.role == current_user.role.PASSENGER %}
+                                    {% if current_user.is_anonymous or current_user.role == current_user.role.PASSENGER %}
                                         <a href="{{ url_for('flight_details', flight_id=flight[0].id) }}" class="btn btn-outline-primary w-100">
                                             <i class="fas fa-ticket-alt"></i> Book Flight
                                         </a>
@@ -243,7 +240,7 @@
                                         Arrival: {{ second_flight.arrival_time }}<br><br>
                                         <strong>Total Price:</strong> €{{ first_flight.selected_price + second_flight.selected_price }}
                                     </p>
-                                    {% if current_user.role == current_user.role.PASSENGER %}
+                                    {% if current_user.is_anonymous or current_user.role == current_user.role.PASSENGER %}
                                         <div class="d-flex gap-2">
                                             <a href="{{ url_for('flight_details', flight_id=first_flight.id) }}" class="btn btn-outline-primary flex-fill">
                                                 Book First Flight

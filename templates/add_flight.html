@@ -1,105 +1,159 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <title>Add Flight</title>
-  
-          <link rel="stylesheet" href="static/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Flight - SkyLine Airways</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='static/style.css') }}" rel="stylesheet">
 </head>
-<body>
-  <form method="post">
-    <!-- <label>From: 
-      <input type="text" name="name_from" required placeholder="Airport Name">
-      <input type="text" name="city_from" required placeholder="Airport City">
-      <input type="text" name="iata_from" required placeholder="Airport IATA-Code">
-    </label><br>
-    <label>To: 
-      <input type="text" name="name_to" required placeholder="Airport Name">
-      <input type="text" name="city_to" required placeholder="Airport City">
-      <input type="text" name="iata_to" required placeholder="Airport IATA-Code">
-    </label><br> -->
-    <label>From: <input type="text" name="from" required></label><br>
-    <label>To: <input type="text" name="to" required></label><br>
-    <label>Data e Orario Partenza (UCT): <input type="datetime-local" name="departure_time" required></label><br>
-    <label>Data e Orario Arrivo (UCT): <input type="datetime-local" name="arrival_time" required></label><br>
-    
-    <h4>Aereo assegnato</h4>
-    <select name="airplane_id" id="airplane-select" onchange="updateAirplaneInfo()" required>
-      <option value="">Seleziona un aereo</option>
-      {% for airplane in airplanes %}
-        <option value="{{ airplane.id }}" 
-                data-economy="{{ airplane.economy_seats }}" 
-                data-business="{{ airplane.business_seats }}" 
-                data-first="{{ airplane.first_class_seats }}"
-                data-capacity="{{ airplane.capacity }}">{{ airplane.model }}</option>
-      {% endfor %}
-    </select>
+<body class="auth-page">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="auth-card fade-in-up">
+          <div class="auth-header">
+            <h3><i class="fas fa-plane"></i> Add New Flight</h3>
+            <p class="mb-0">Fill in the details below</p>
+          </div>
+          <div class="p-4">
+            <form method="POST">
 
-    <div id="airplane-info" style="display: none;">
-      <h4>Posti Disponibili</h4>
-      <p>Economy: <strong id="economy-seats">-</strong> posti</p>
-      <p>Business: <strong id="business-seats">-</strong> posti</p>
-      <p>First Class: <strong id="first-seats">-</strong> posti</p>
-      <p><strong>Totale: <span id="total-seats">-</span> posti</strong></p>
+              <!-- From / To -->
+              <div class="mb-3">
+                <label for="from" class="form-label">From</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-plane-departure"></i></span>
+                  <input type="text" class="form-control" name="from" id="from" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="to" class="form-label">To</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-plane-arrival"></i></span>
+                  <input type="text" class="form-control" name="to" id="to" required>
+                </div>
+              </div>
+
+              <!-- Date and Time -->
+              <div class="mb-3">
+                <label for="departure_time" class="form-label">Departure Time (UTC)</label>
+                <input type="datetime-local" class="form-control" name="departure_time" id="departure_time" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="arrival_time" class="form-label">Arrival Time (UTC)</label>
+                <input type="datetime-local" class="form-control" name="arrival_time" id="arrival_time" required>
+              </div>
+
+              <!-- Airplane Select -->
+              <div class="mb-3">
+                <label for="airplane-select" class="form-label">Assigned Airplane</label>
+                <select name="airplane_id" id="airplane-select" class="form-select" onchange="updateAirplaneInfo()" required>
+                  <option value="">Select an airplane</option>
+                  {% for airplane in airplanes %}
+                    <option value="{{ airplane.id }}" 
+                            data-economy="{{ airplane.economy_seats }}" 
+                            data-business="{{ airplane.business_seats }}" 
+                            data-first="{{ airplane.first_class_seats }}"
+                            data-capacity="{{ airplane.capacity }}">{{ airplane.model }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+
+              <div id="airplane-info" class="alert alert-info" style="display: none;">
+                <h6>Available Seats</h6>
+                <p>Economy: <strong id="economy-seats">-</strong></p>
+                <p>Business: <strong id="business-seats">-</strong></p>
+                <p>First Class: <strong id="first-seats">-</strong></p>
+                <p><strong>Total: <span id="total-seats">-</span></strong></p>
+              </div>
+<!-- Prices -->
+              <h5 class="mt-4"><i class="fas fa-euro-sign"></i> Ticket Prices</h5>
+              <div class="mb-3">
+                <label for="price_economy" class="form-label">Economy</label>
+                <input type="number" class="form-control" name="price_economy" id="price_economy" required>
+              </div>
+              <div class="mb-3">
+                <label for="price_business" class="form-label">Business</label>
+                <input type="number" class="form-control" name="price_business" id="price_business" required>
+              </div>
+              <div class="mb-3">
+                <label for="price_first" class="form-label">First Class</label>
+                <input type="number" class="form-control" name="price_first" id="price_first" required>
+              </div>
+
+              <!-- Extras -->
+              <h5 class="mt-4"><i class="fas fa-plus-circle"></i> Extras</h5>
+              <div id="extra-fields">
+                <div class="input-group mb-2">
+                  <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                  <input type="text" class="form-control" name="extra_name_1" placeholder="Extra Name">
+                  <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                  <input type="number" class="form-control" name="extra_price_1" placeholder="Extra Price">
+                </div>
+              </div>
+              <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addExtra()">
+                <i class="fas fa-plus"></i> Add New Extra
+              </button>
+
+              <!-- Buttons -->
+              <div class="d-flex justify-content-between">
+                <a href="{{ url_for('airline_profile', airline_id=current_user.airline_profile.id) }}" class="btn btn-outline-secondary">
+                  <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-check"></i> Add Flight
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <h4>Costo Posti</h4>
-    <label>Economy: <input type="number" name="price_economy" required></label><br>
-    <label>Business: <input type="number" name="price_business" required></label><br>
-    <label>First: <input type="number" name="price_first" required></label><br>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function updateAirplaneInfo() {
+    const select = document.getElementById('airplane-select');
+    const selectedOption = select.options[select.selectedIndex];
+    const infoDiv = document.getElementById('airplane-info');
 
-    <h4>Extra</h4>
-    <div id="extra-fields">
-      <input type="text" name="extra_name_1" placeholder="Extra Name">
-      <input type="number" name="extra_price_1" placeholder="Extra Price">
-    </div>
-    <button type="button" onclick="addExtra()">Add New Extra</button>
-    
-
-    <br><br>
-    <button type="submit">Add</button>
-  </form>
-  <a href="{{ url_for('airline_profile', airline_id=current_user.airline_profile.id) }}"> Annulla </a>
-
-
-   <!-- DA TESTARE  -->
-  <script>
-
-    function updateAirplaneInfo() {
-      const select = document.getElementById('airplane-select');
-      const selectedOption = select.options[select.selectedIndex];
-      const infoDiv = document.getElementById('airplane-info');
-      
-      if (selectedOption.value === '') {
-        infoDiv.style.display = 'none';
-        return;
-      }
-      
-      // Ottieni i dati dall'option selezionata
-      const economySeats = selectedOption.getAttribute('data-economy');
-      const businessSeats = selectedOption.getAttribute('data-business');
-      const firstSeats = selectedOption.getAttribute('data-first');
-      const capacity = selectedOption.getAttribute('data-capacity');
-      
-      // Aggiorna le informazioni (solo visualizzazione)
-      document.getElementById('economy-seats').textContent = economySeats;
-      document.getElementById('business-seats').textContent = businessSeats;
-      document.getElementById('first-seats').textContent = firstSeats;
-      document.getElementById('total-seats').textContent = capacity;
-      
-      // Mostra il div informazioni
-      infoDiv.style.display = 'block';
+    if (selectedOption.value === '') {
+      infoDiv.style.display = 'none';
+      return;
     }
 
-    let extraCount = 1;
-    function addExtra() {
-      extraCount++;
-      const div = document.getElementById('extra-fields');
-      const html = `
-        <br>
-        <input type="text" name="extra_name_${extraCount}" placeholder="Extra Name">
-        <input type="number" name="extra_price_${extraCount}" placeholder="Extra Price">
-      `;
-      div.insertAdjacentHTML('beforeend', html);
-    }
-  </script>
+    const economySeats = selectedOption.getAttribute('data-economy');
+    const businessSeats = selectedOption.getAttribute('data-business');
+    const firstSeats = selectedOption.getAttribute('data-first');
+    const capacity = selectedOption.getAttribute('data-capacity');
+
+    document.getElementById('economy-seats').textContent = economySeats;
+    document.getElementById('business-seats').textContent = businessSeats;
+    document.getElementById('first-seats').textContent = firstSeats;
+    document.getElementById('total-seats').textContent = capacity;
+
+    infoDiv.style.display = 'block';
+  }
+
+  let extraCount = 1;
+  function addExtra() {
+    extraCount++;
+    const div = document.getElementById('extra-fields');
+    const html = `
+      <div class="input-group mb-2">
+        <span class="input-group-text"><i class="fas fa-tag"></i></span>
+        <input type="text" class="form-control" name="extra_name_${extraCount}" placeholder="Extra Name">
+        <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+        <input type="number" class="form-control" name="extra_price_${extraCount}" placeholder="Extra Price">
+      </div>
+    `;
+    div.insertAdjacentHTML('beforeend', html);
+  }
+</script>
 </body>
 </html>

@@ -1,88 +1,143 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        
-        <link rel="stylesheet" href="static/style.css">
-        <meta charset='utf-8'>
-        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-        <title>Flight Detail</title>
-        <meta name='viewport' content='width=device-width, initial-scale=1'>
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
-    </head>
-    <body>
-        <!-- dettagli per il volo selezionato -->
-        {% if error is not none %}
-            <p class="text-red-500">{{ error }}</p>
-        {% endif %}
-
-        <div class="flight-details">
-            <h1 class="text-2xl font-bold mb-4">Flight Details</h1>
-            
-            <div class="mb-4">
-                <p><strong>From:</strong> {{ flight.departure_airport }}</p>
-                <p><strong>To:</strong> {{ flight.destination_airport }}</p>
-                <p><strong>Departure:</strong> {{ flight.departure_time }}</p>
-                <p><strong>Arrival:</strong> {{ flight.arrival_time }}</p>
-            </div>
-        </div>
-
-        <div class="seat-info mb-4">
-            <h3>Seat Availability</h3>
-            <p><strong>Total Remaining Seats:</strong> <span id="total-remaining-seats">{{available_tickets.total}}</span></p>
-            
-            <div class="class-breakdown">
-                <p>Economy: <span id="economy-seats">{{available_tickets.economy}}</span> remaining</p>
-                <p>Business: <span id="business-seats">{{available_tickets.business}}</span> remaining</p>
-                <p>First Class: <span id="first-class-seats">{{available_tickets.first_class}}</span> remaining</p>
-            </div>
-        </div>
-
-        <!-- Bottone finale per comprare il biglietto (triggera book_ticket()) -->
-        <form method="post">
-            <!-- id per trovare il volo da linkare al biglietto-->
-            <label for="seat_number">Seat Number:</label>
-            <input type="number" id="seat_number" name="seat_number" required class="input mb-4" placeholder="Enter seat number">
-
-            <label for="class">Class:</label>
-            <select id="class" name="flight_class" required class="input">
-                <option value="economy">Economy {{ flight.economy_price }}</option>
-                <option value="business">Business {{ flight.business_price }}</option>
-                <option value="first_class">First Class {{ flight.first_class_price }}</option>
-            </select>
-            <div class="extras-section mb-4">
-                <label for="extras">Extras:</label>
-                {% if flight.extras and flight.extras|length > 0 %}
-                    <div class="extras-list">
-                        {% for extra in flight.extras %}
-                            <div class="extra-item flex items-center mb-2">
-                                <input type="checkbox" 
-                                       id="extra_{{ loop.index }}" 
-                                       name="selected_extras" 
-                                       value="{{ extra.name }}|{{ extra.price }}"
-                                       class="mr-2"
-                                       onchange="updateTotalPrice()">
-                                <label for="extra_{{ loop.index }}" class="cursor-pointer">
-                                    {{ extra.name }} - €{{ extra.price }}
-                                </label>
-                            </div>
-                        {% endfor %}
-                    </div>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Flight Detail</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='static/style.css') }}" rel="stylesheet">
+    <!-- <script src="https://cdn.tailwindcss.com"></script> -->
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+</head>
+<body>
+    <!-- Navbar (puoi includere qui il codice della navbar se non usi extends) -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('hello_world') }}">
+                <i class="fas fa-plane-departure"></i> Flight Finder
+            </a>
+            <div class="navbar-nav ms-auto">
+                {% if not current_user.is_anonymous %}
+                    <span class="navbar-text me-3">
+                        Welcome, <strong>{{ current_user.email }}</strong>
+                    </span>
+                    {% if current_user.role == current_user.role.PASSENGER %}
+                        <a class="nav-link" href="{{ url_for('user') }}"><i class="fas fa-user"></i> My Profile</a>
+                    {% elif current_user.role == current_user.role.AIRLINE %}
+                        <a class="nav-link" href="{{ url_for('airline_profile' , airline_id=current_user.airline_profile.id) }}"><i class="fas fa-plane"></i> My Flights</a>
+                    {% endif %}
+                    <a class="nav-link text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
                 {% else %}
-                    <p class="text-gray-500">Nessun extra disponibile per questo volo</p>
+                    <a class="nav-link" href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a class="nav-link" href="{{ url_for('register') }}"><i class="fas fa-user-plus"></i> Register</a>
                 {% endif %}
             </div>
+        </div>
+    </nav>
 
-            <div class="price-summary">
-                <p><strong>Prezzo base: €<span id="base-price">0</span></strong></p>
-                <p>Extras: €<span id="extras-price">0</span></p>
-                <p class="text-lg font-bold">Totale: €<span id="total-price">0</span></p>
+    <div class="container mt-5">
+        {% if error is not none %}
+            <div class="alert alert-danger text-center">{{ error }}</div>
+        {% endif %}
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h2 class="mb-0"><i class="fas fa-plane"></i> Flight Details</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <p><strong>From:</strong> {{ flight.departure_airport }}</p>
+                            <p><strong>To:</strong> {{ flight.destination_airport }}</p>
+                            <p><strong>Departure:</strong> {{ flight.departure_time }}</p>
+                            <p><strong>Arrival:</strong> {{ flight.arrival_time }}</p>
+                        </div>
+                        <div class="mb-4">
+                            <h5><i class="fas fa-chair"></i> Seat Availability</h5>
+                            <div class="row">
+                                <div class="col-6 col-md-3">
+                                    <span class="fw-bold">Total:</span>
+                                    <span id="total-remaining-seats" class="badge bg-success">{{available_tickets.total}}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span>Economy:</span>
+                                    <span id="economy-seats" class="badge bg-info">{{available_tickets.economy}}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span>Business:</span>
+                                    <span id="business-seats" class="badge bg-warning text-dark">{{available_tickets.business}}</span>
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <span>First Class:</span>
+                                    <span id="first-class-seats" class="badge bg-danger">{{available_tickets.first_class}}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <form method="post" class="mt-4">
+                            <div class="mb-3">
+                                <label for="seat_number" class="form-label">Seat Number</label>
+                                <input type="number" id="seat_number" name="seat_number" required class="form-control" placeholder="Enter seat number">
+                            </div>
+                            <div class="mb-3">
+                                <label for="class" class="form-label">Class</label>
+                                <select id="class" name="flight_class" required class="form-select">
+                                    <option value="economy">Economy €{{ flight.economy_price }}</option>
+                                    <option value="business">Business €{{ flight.business_price }}</option>
+                                    <option value="first_class">First Class €{{ flight.first_class_price }}</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Extras</label>
+                                {% if flight.extras and flight.extras|length > 0 %}
+                                    <div class="row">
+                                        {% for extra in flight.extras %}
+                                            <div class="col-12 col-md-6 mb-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="extra_{{ loop.index }}"
+                                                        name="selected_extras"
+                                                        value="{{ extra.name }}|{{ extra.price }}"
+                                                        onchange="updateTotalPrice()">
+                                                    <label class="form-check-label" for="extra_{{ loop.index }}">
+                                                        {{ extra.name }} - €{{ extra.price }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <p class="text-muted">No extras available for this flight</p>
+                                {% endif %}
+                            </div>
+                            <div class="mb-4">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <p class="mb-1"><strong>Base Price:</strong> €<span id="base-price">0</span></p>
+                                        <p class="mb-1">Extras: €<span id="extras-price">0</span></p>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <p class="fs-5 fw-bold">Total: €<span id="total-price">0</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="flight_id" value="{{ flight.id }}">
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-ticket-alt"></i> Buy Ticket
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <a href="{{ url_for('hello_world') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Search
+                </a>
             </div>
-
-            <input type="hidden" name="flight_id" value="{{ flight.id }}">
-            <button type="submit">Buy</button>
-        </form>
-    </body>
+        </div>
+    </div>
     <script>
         const flightPrices = {
             'economy': {{ flight.economy_price }},
@@ -92,35 +147,22 @@
 
         // Socket.io connection
         const socket = io.connect('http://' + document.domain + ':' + location.port);
-        
+
         // Join room quando l'utente visita la pagina del volo
         socket.emit('join_flight', {flight_id: '{{ flight_id }}'});
 
         // Ascolta aggiornamenti sui posti
         socket.on('seat_update', function(data) {
             console.log('Seat update for flight:', data.flight_id, data.data);
-            // Aggiorna UI dei posti disponibili
             updateSeatAvailability(data.data);
         });
-
-        // Leave room quando l'utente lascia la pagina
-        // document.addEventListener('visibilitychange', function() {
-        //     if (document.hidden) {
-        //         console.log('Leaving flight room:', '{{ flight_id }}');
-        //         socket.emit('leave_flight', {flight_id: '{{ flight_id }}'});
-        //     }
-        // });
-    
-        // window.addEventListener('beforeunload', function() {
-            
-        // });
 
         function updateSeatAvailability(data) {
             const economyElement = document.getElementById('economy-seats');
             const businessElement = document.getElementById('business-seats');
             const firstClassElement = document.getElementById('first-class-seats');
             const totalSeatsElement = document.getElementById('total-remaining-seats');
-            
+
             if (economyElement) economyElement.textContent = data.economy_available;
             if (businessElement) businessElement.textContent = data.business_available;
             if (firstClassElement) firstClassElement.textContent = data.first_class_available;
@@ -128,30 +170,25 @@
         }
 
         function updateTotalPrice() {
-            // Ottieni la classe selezionata
             const selectedClass = document.getElementById('class').value;
             const basePrice = flightPrices[selectedClass] || 0;
-            
-            // Calcola il prezzo degli extra selezionati
+
             let extrasPrice = 0;
             const selectedExtras = document.querySelectorAll('input[name="selected_extras"]:checked');
-            
             selectedExtras.forEach(checkbox => {
                 const value = checkbox.value; // formato: "nome|prezzo"
                 const price = parseFloat(value.split('|')[1]) || 0;
                 extrasPrice += price;
             });
-            
-            // Aggiorna il display
+
             document.getElementById('base-price').textContent = basePrice.toFixed(2);
             document.getElementById('extras-price').textContent = extrasPrice.toFixed(2);
             document.getElementById('total-price').textContent = (basePrice + extrasPrice).toFixed(2);
         }
 
-        // Aggiorna il prezzo quando cambia la classe
         document.getElementById('class').addEventListener('change', updateTotalPrice);
-        
-        // Inizializza il prezzo al caricamento della pagina
         document.addEventListener('DOMContentLoaded', updateTotalPrice);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
