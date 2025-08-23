@@ -49,9 +49,14 @@ def hello_world():
         
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
+        #! non dovrebbe più servirci
         direct = request.form.get('direct_flight') == 'on' # True or False
+
         class_type = request.form.get('flight_class') # Economy, Business, First Class 
-        
+
+        departure_date = request.form.get('departure_date')
+        arrival_date = request.form.get('arrival_date')
+
         min_price = request.form.get('min_price')
         max_price = request.form.get('max_price') 
         sort_by = request.form.get('sort_by') 
@@ -59,7 +64,7 @@ def hello_world():
         search = True
 
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
-        flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by)
+        flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by, departure_date, arrival_date)
     return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search)
 
 # get information about the user (flights tikets etcc)
