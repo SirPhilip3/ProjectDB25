@@ -27,6 +27,9 @@ def hello_world():
     #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
     direct = False # False di default
     # se l'utente ha cliccato search in base.html
+
+    search = False # Variabile per non mostrare "No flights available for the selected route." al primo caricamento della pagina
+
     if request.method == 'POST':
         #! ricerca aereoporti non usata
         # departure_airport_name = request.form['name_from']
@@ -52,10 +55,12 @@ def hello_world():
         min_price = request.form.get('min_price')
         max_price = request.form.get('max_price') 
         sort_by = request.form.get('sort_by') 
-        
+
+        search = True
+
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
         flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by)
-    return render_template("base.html", flights=flights, user=current_user, direct_flight=direct)
+    return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search)
 
 # get information about the user (flights tikets etcc)
 #! maybe inutile

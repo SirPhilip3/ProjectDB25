@@ -112,6 +112,13 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* .search-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+} */
+
+
 /* ===== FLIGHT CARD ===== */
 .flight-card {
     border: none;

@@ -155,6 +155,14 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
             F2.departure_time >= F1.arrival_time + timedelta(hours=2)).all()
         # Aggiungo in coda ai voli diretti i voli con scalo
         flights.extend(flights_aux)
+
+    # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
+    for first_flight, second_flight in flights:
+        first_flight.selected_class = class_type
+        first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
+        if second_flight:
+            second_flight.selected_class = class_type
+            second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
     
     # Filtri per prezzo
     if min_price:
@@ -190,13 +198,6 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
             flights.sort(key=lambda pair: ((pair[0].arrival_time - pair[0].departure_time).total_seconds()
             if pair[1] is None else (pair[1].arrival_time - pair[0].departure_time).total_seconds()))
 
-    # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-    for first_flight, second_flight in flights:
-        first_flight.selected_class = class_type
-        first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
-        if second_flight:
-            second_flight.selected_class = class_type
-            second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
     print(flights)
     return flights
 
