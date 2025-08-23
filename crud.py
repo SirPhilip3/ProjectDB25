@@ -270,7 +270,7 @@ def get_airline_statistics(airline_id):
     Ritorna le statistiche generali di una compagnia aerea
     + numero di voli 
     + numero di aerei
-    + numero di biglietti venduti 
+    + numero di biglietti venduti
     + ricavi totali
     """
     flights = get_flights_by_airline(airline_id)

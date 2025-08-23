@@ -86,13 +86,8 @@ def airline_profile(airline_id):
         n_flights , n_airplanes, n_tickets , tot_revenue = get_airline_statistics(current_user.airline_profile.id)
         print(f"Airline {current_user.airline_profile.id} has {n_flights} flights, {n_airplanes} airplanes, {n_tickets} tickets sold, total revenue: {tot_revenue}")
 
-
         top_routes = get_airline_top_routes(current_user.airline_profile.id)
         class_distribution = get_airline_class_distribution(current_user.airline_profile.id)
-
-
-        
-
 
 
         # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
