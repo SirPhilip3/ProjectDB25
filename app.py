@@ -30,6 +30,8 @@ def hello_world():
 
     search = False # Variabile per non mostrare "No flights available for the selected route." al primo caricamento della pagina
 
+    form_data = {}
+
     if request.method == 'POST':
         #! ricerca aereoporti non usata
         # departure_airport_name = request.form['name_from']
@@ -46,6 +48,9 @@ def hello_world():
         # if not departure_airport or not arrival_airport:
         #     print("One or both airports not found, please check the input.")
         #     redirect(url_for('hello_world'))
+        if 'reset' in request.form:
+            # Reset: nessun filtro, nessun volo, nessun search
+            return render_template("base.html", flights=[], user=current_user, direct_flight=False, search=False, cached_form={})
         
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
@@ -54,18 +59,38 @@ def hello_world():
 
         class_type = request.form.get('flight_class') # Economy, Business, First Class 
 
-        departure_date = request.form.get('departure_date')
+        # departure_date = datetime.fromisoformat(request.form.get('departure_date'))
+        departure_date_str = request.form.get('departure_date')
+        if departure_date_str:
+            departure_date = datetime.fromisoformat(departure_date_str)
+        else: 
+            departure_date = datetime.now()
+            departure_date_str = departure_date.isoformat(timespec='minutes')  # formato compatibile con input type="datetime-local"
+
+
+        #! per far specificare all'utente l'orario massimo di arrivo
         arrival_date = request.form.get('arrival_date')
 
         min_price = request.form.get('min_price')
         max_price = request.form.get('max_price') 
         sort_by = request.form.get('sort_by') 
 
-        search = True
+        form_data = {
+            "from": from_,
+            "to": to_,
+            "direct": direct,
+            "departure_date": departure_date_str,
+            # "arrival_date": arrival_date,
+            "min_price": min_price,
+            "max_price": max_price,
+            "sort_by": sort_by
+        }
+        print(form_data)
 
+        search = True
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
-        flights = search_flight(from_, to_, direct, class_type, min_price, max_price, sort_by, departure_date, arrival_date)
-    return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search)
+        flights = search_flight(from_, to_, direct, min_price, max_price, sort_by, departure_date)
+    return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search, cached_form=form_data)
 
 # get information about the user (flights tikets etcc)
 #! maybe inutile
@@ -159,7 +184,6 @@ def add_flight_page():
             # if not arrival_airport :
             #     print("Departure airport not found, adding it.")
             #     arrival_airport=add_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
-
             departure_airport = request.form['from']
             arrival_airport = request.form['to']
             
@@ -185,8 +209,13 @@ def add_flight_page():
                     else :
                         print(f"Extra {value} has no price, skipping.")
             
-            add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
-    
+            new_flight = add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
+            
+            if new_flight:
+                flash("✅ Flight added successfully.", "success")
+            else:
+                flash("❌ Error: flight could not be added.", "danger")
+
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
         
         return render_template('add_flight.html', airplanes=airplanes)
@@ -223,11 +252,23 @@ def flight_details(flight_id):
         return redirect(url_for('hello_world'))
 
     available_tickets = get_remaining_ticket_count_by_flight(flight_id)
-
+    occupied_seats = get_occupied_seats(flight_id)
+    # occupied_seats = []
     if request.method == 'POST':
         flight_id = request.form.get('flight_id')
-        ticket_class = request.form.get('flight_class')  
         seat_number = request.form.get('seat_number')
+
+        seat_letter = seat_number[0]
+        if seat_letter == 'E':
+            ticket_class = 'economy'
+        elif seat_letter == 'B':
+            ticket_class = 'business'
+        elif seat_letter == 'F':
+            ticket_class = 'first_class'
+        else:
+            error = "Invalid seat number format."
+
+        print(f"Attempting to book ticket: {flight_id}, {seat_number}")
 
         selected_extras = []
         for value in request.form.getlist('selected_extras[]'):
@@ -250,17 +291,25 @@ def flight_details(flight_id):
         )
 
         if ticket:
+            socketio.emit(
+                'seat_update',
+                {
+                    'flight_id': str(flight_id),
+                    'occupied_seats': occupied_seats
+                },
+                room=f'flight_{flight_id}'
+            )
             flash('Ticket booked successfully!', 'success')
             # se ha successo ritorno alla pagina principale
             # o alla pagina in cui l'utente vede i suoi voli prenotati
             # per ora torno alla pagina principale
             return redirect(url_for('hello_world'))
         else:
+            db.session.rollback()
             flash(f'Booking failed: {message}', 'error')
-            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets)
+            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets, seat_status=occupied_seats)
 
-    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets)
-
+    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets, seat_status=occupied_seats)
 
 
 if __name__ == '__main__':

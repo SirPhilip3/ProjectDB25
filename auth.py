@@ -58,6 +58,22 @@ def register ():
         # se l'utente è un airline, richiedi anche il nome della compagnia aerea
         airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
 
+
+      
+
+        # Controlla se email è già usata
+        if User.query.filter_by(email=email).first():
+            flash('This email is already registered.', 'error')
+            return redirect(url_for('register'))
+
+        # Controlla se airline name esiste già
+        if role == UserRole.AIRLINE and Airline.query.filter_by(name=airline_name).first():
+            flash('Airline name already exists.', 'error')
+            return redirect(url_for('register'))
+
+
+        
+
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(email=email, role=role, password=hashed_password)
         db.session.add(new_user)

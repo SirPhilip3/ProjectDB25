@@ -200,6 +200,31 @@
             </div>
         </div>
 
+     
+
+
+           <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <!-- Freccia indietro -->
+        <a href="javascript:history.back()" class="text-decoration-none me-3 fs-4" title="Back">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <!-- Freccia home -->
+        <a href="{{ url_for('hello_world') }}" class="text-decoration-none fs-4" title="Home">
+            <i class="fas fa-home"></i>
+        </a>
+    </div>
+  
+    <div>
+        <a href="/logout" class="btn btn-outline-danger">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+    </div>
+</div>
+
+
+
+
         <!-- Back to Search -->
         <div class="text-center mt-4">
             <a href="{{ url_for('hello_world') }}" class="btn btn-outline-secondary">
@@ -207,6 +232,9 @@
             </a>
         </div>
     </div>
+
+
+    
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

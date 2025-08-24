@@ -11,6 +11,35 @@
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
+<style>
+    .seat-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 1rem;
+    }
+    .seat-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: 2px solid #ccc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        cursor: pointer;
+        user-select: none;
+        transition: border 0.2s, box-shadow 0.2s;
+    }
+    .seat-economy { background: #d1fae5; border-color: #10b981; }
+    .seat-business { background: #fef9c3; border-color: #f59e42; }
+    .seat-first { background: #fee2e2; border-color: #ef4444; }
+    .seat-economy.seat-occupied { background: #10b981 !important; border-color: #10b981 !important; color: #fff; cursor: not-allowed; }
+    .seat-business.seat-occupied { background: #f59e42 !important; border-color: #f59e42 !important; color: #fff; cursor: not-allowed; }
+    .seat-first.seat-occupied { background: #ef4444 !important; border-color: #ef4444 !important; color: #fff; cursor: not-allowed; }
+    /* .seat-occupied { background: #6b7280 !important; color: #fff; cursor: not-allowed; } */
+    .seat-selected { box-shadow: 0 0 0 3px #2563eb; border-color: #2563eb; }
+</style>
 <body>
     <!-- Navbar (puoi includere qui il codice della navbar se non usi extends) -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -77,10 +106,13 @@
                             </div>
                         </div>
                         <form method="post" class="mt-4">
-                            <div class="mb-3">
+                            
+                            <!-- <div class="mb-3">
                                 <label for="seat_number" class="form-label">Seat Number</label>
                                 <input type="number" id="seat_number" name="seat_number" required class="form-control" placeholder="Enter seat number">
                             </div>
+
+
                             <div class="mb-3">
                                 <label for="class" class="form-label">Class</label>
                                 <select id="class" name="flight_class" required class="form-select">
@@ -88,7 +120,13 @@
                                     <option value="business">Business €{{ flight.business_price }}</option>
                                     <option value="first_class">First Class €{{ flight.first_class_price }}</option>
                                 </select>
+                            </div> -->
+                            <div class="mb-3">
+                                <label class="form-label">Select Your Seat</label>
+                                <div id="seat-grid" class="seat-grid"></div>
+                                <input type="hidden" id="seat_number" name="seat_number" required>
                             </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Extras</label>
                                 {% if flight.extras and flight.extras|length > 0 %}
@@ -128,6 +166,7 @@
                                 <button type="submit" class="btn btn-success btn-lg">
                                     <i class="fas fa-ticket-alt"></i> Buy Ticket
                                 </button>
+                                <p class="text-center text-muted mt-2">Operated by <strong>{{ flight.airline.name }}</strong></p>
                             </div>
                         </form>
                     </div>
@@ -139,55 +178,137 @@
         </div>
     </div>
     <script>
-        const flightPrices = {
-            'economy': {{ flight.economy_price }},
-            'business': {{ flight.business_price }},
-            'first_class': {{ flight.first_class_price }}
-        };
 
-        // Socket.io connection
-        const socket = io.connect('http://' + document.domain + ':' + location.port);
+    const seatStatus = {{ seat_status|tojson }};
+    const numEconomy = {{ flight.airplane.economy_seats }};
+    const numBusiness = {{ flight.airplane.business_seats }};
+    const numFirst = {{ flight.airplane.first_class_seats }};
 
-        // Join room quando l'utente visita la pagina del volo
-        socket.emit('join_flight', {flight_id: '{{ flight_id }}'});
+    function renderSeatGrid() {
+        const grid = document.getElementById('seat-grid');
+        grid.innerHTML = '';
 
-        // Ascolta aggiornamenti sui posti
-        socket.on('seat_update', function(data) {
-            console.log('Seat update for flight:', data.flight_id, data.data);
-            updateSeatAvailability(data.data);
+        // Economy
+        for (let i = 0; i < numEconomy; i++) {
+            const code = `E${i}`;
+            const div = document.createElement('div');
+            div.classList.add('seat-box', 'seat-economy');
+            div.textContent = code;
+            div.dataset.seatCode = code;
+            div.dataset.seatClass = 'economy'; 
+            if (seatStatus.includes(code)) {
+                div.classList.add('seat-occupied');
+            } else {
+                div.addEventListener('click', function() {
+                    document.querySelectorAll('.seat-box').forEach(b => b.classList.remove('seat-selected'));
+                    div.classList.add('seat-selected');
+                    document.getElementById('seat_number').value = code;
+                    setBasePrice('economy');
+                });
+            }
+            grid.appendChild(div);
+        }
+        // Business
+        for (let i = 0; i < numBusiness; i++) {
+            const code = `B${i}`;
+            const div = document.createElement('div');
+            div.classList.add('seat-box', 'seat-business');
+            div.textContent = code;
+            div.dataset.seatCode = code;
+            div.dataset.seatClass = 'business';
+            if (seatStatus.includes(code)) {
+                div.classList.add('seat-occupied');
+            } else {
+                div.addEventListener('click', function() {
+                    document.querySelectorAll('.seat-box').forEach(b => b.classList.remove('seat-selected'));
+                    div.classList.add('seat-selected');
+                    document.getElementById('seat_number').value = code;
+                    setBasePrice('business');
+                });
+            }
+            grid.appendChild(div);
+        }
+        // First Class
+        for (let i = 0; i < numFirst; i++) {
+            const code = `F${i}`;
+            const div = document.createElement('div');
+            div.classList.add('seat-box', 'seat-first');
+            div.textContent = code;
+            div.dataset.seatCode = code;
+            div.dataset.seatClass = 'first_class';
+            if (seatStatus.includes(code)) {
+                div.classList.add('seat-occupied');
+            } else {
+                div.addEventListener('click', function() {
+                    document.querySelectorAll('.seat-box').forEach(b => b.classList.remove('seat-selected'));
+                    div.classList.add('seat-selected');
+                    document.getElementById('seat_number').value = code;
+                    setBasePrice('first_class');
+                });
+            }
+            grid.appendChild(div);
+        }
+    }
+
+    const flightPrices = {
+        'economy': {{ flight.economy_price }},
+        'business': {{ flight.business_price }},
+        'first_class': {{ flight.first_class_price }}
+    };
+
+    // Socket.io connection
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    // Join room quando l'utente visita la pagina del volo
+    socket.emit('join_flight', {flight_id: '{{ flight_id }}'});
+
+    // Ascolta aggiornamenti sui posti
+    socket.on('seat_update', function(data) {
+        console.log('Seat update for flight:', data.flight_id, data.data);
+        updateSeatAvailability(data.data);
+    });
+
+    function updateSeatAvailability(data) {
+        const economyElement = document.getElementById('economy-seats');
+        const businessElement = document.getElementById('business-seats');
+        const firstClassElement = document.getElementById('first-class-seats');
+        const totalSeatsElement = document.getElementById('total-remaining-seats');
+
+        if (economyElement) economyElement.textContent = data.economy_available;
+        if (businessElement) businessElement.textContent = data.business_available;
+        if (firstClassElement) firstClassElement.textContent = data.first_class_available;
+        if (totalSeatsElement) totalSeatsElement.textContent = data.total_available;
+    }
+
+    function setBasePrice(seatClass) {
+        document.getElementById('base-price').textContent = (flightPrices[seatClass] || 0).toFixed(2);
+        updateTotalPrice(); // AGGIUNGI QUESTA RIGA
+    }
+
+    function updateTotalPrice() {
+        const selectedSeat = document.querySelector('.seat-box.seat-selected');
+        let basePrice = 0;
+        if (selectedSeat) {
+            const seatClass = selectedSeat.dataset.seatClass;
+            basePrice = flightPrices[seatClass] || 0;
+        }
+        let extrasPrice = 0;
+        const selectedExtras = document.querySelectorAll('input[name="selected_extras[]"]:checked');
+        selectedExtras.forEach(checkbox => {
+            const value = checkbox.value;
+            const price = parseFloat(value.split('|')[1]) || 0;
+            extrasPrice += price;
         });
+        document.getElementById('base-price').textContent = basePrice.toFixed(2);
+        document.getElementById('extras-price').textContent = extrasPrice.toFixed(2);
+        document.getElementById('total-price').textContent = (basePrice + extrasPrice).toFixed(2);
+    }
 
-        function updateSeatAvailability(data) {
-            const economyElement = document.getElementById('economy-seats');
-            const businessElement = document.getElementById('business-seats');
-            const firstClassElement = document.getElementById('first-class-seats');
-            const totalSeatsElement = document.getElementById('total-remaining-seats');
-
-            if (economyElement) economyElement.textContent = data.economy_available;
-            if (businessElement) businessElement.textContent = data.business_available;
-            if (firstClassElement) firstClassElement.textContent = data.first_class_available;
-            if (totalSeatsElement) totalSeatsElement.textContent = data.total_available;
-        }
-
-        function updateTotalPrice() {
-            const selectedClass = document.getElementById('class').value;
-            const basePrice = flightPrices[selectedClass] || 0;
-
-            let extrasPrice = 0;
-            const selectedExtras = document.querySelectorAll('input[name="selected_extras"]:checked');
-            selectedExtras.forEach(checkbox => {
-                const value = checkbox.value; // formato: "nome|prezzo"
-                const price = parseFloat(value.split('|')[1]) || 0;
-                extrasPrice += price;
-            });
-
-            document.getElementById('base-price').textContent = basePrice.toFixed(2);
-            document.getElementById('extras-price').textContent = extrasPrice.toFixed(2);
-            document.getElementById('total-price').textContent = (basePrice + extrasPrice).toFixed(2);
-        }
-
-        document.getElementById('class').addEventListener('change', updateTotalPrice);
-        document.addEventListener('DOMContentLoaded', updateTotalPrice);
+    // document.getElementById('class').addEventListener('change', updateTotalPrice);
+    document.addEventListener('DOMContentLoaded', function() {
+        renderSeatGrid();
+        updateTotalPrice();
+    });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -52,14 +52,14 @@
                                     <label for="start_airport" class="form-label">From</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-plane-departure fa-sm"></i></span>
-                                        <input type="text" class="form-control" id="start_airport" name="start_airport" required placeholder="Da dove vuoi partire?">
+                                        <input type="text" class="form-control" id="start_airport" name="start_airport" required placeholder="Da dove vuoi partire?" value="{{ cached_form.from or '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="end_airport" class="form-label">To</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-plane-arrival fa-sm"></i></span>
-                                        <input type="text" class="form-control" id="end_airport" name="end_airport" required placeholder="Dove vuoi andare?">
+                                        <input type="text" class="form-control" id="end_airport" name="end_airport" required placeholder="Dove vuoi andare?" value="{{ cached_form.to or '' }}">
                                     </div>
                                 </div>
                             </div>
@@ -68,8 +68,16 @@
                                     <label for="departure_date" class="form-label">Departure Date</label>
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                        <input type="date" class="form-control" id="departure_date" name="departure_date" required>
+                                        <input type="datetime-local" class="form-control" id="departure_date" name="departure_date" value="{{ cached_form.departure_date or '' }}">
                                     </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 d-flex align-items-end">
+                                <div class="form-check ms-2">
+                                    <input class="form-check-input" type="checkbox" id="direct_flight" name="direct_flight"  {% if cached_form.direct %}checked{% endif %}>
+                                    <label class="form-check-label" for="direct_flight">
+                                        <i class="fas fa-route"></i> Show only direct flights
+                                    </label>
                                 </div>
                             </div>
 
@@ -102,18 +110,18 @@
                                     <div class="col-6">
                                         <div class="input-group mb-2">
                                             <span class="input-group-text">Min</span>
-                                            <input type="number" class="form-control" id="min_price" name="min_price" value="0" min="0">
+                                            <input type="number" class="form-control" id="min_price" name="min_price"  value="{{ cached_form.min_price or 0 }}" min="0">
                                         </div>
-                                        <input type="range" class="form-range" id="price_slider_min" min="0" max="2000" step="10" value="0"
+                                        <input type="range" class="form-range" id="price_slider_min" min="0" max="2000" step="10" value="{{ cached_form.min_price or 0 }}"
                                             oninput="syncPriceInputs()">
                                     </div>
                                     <!-- Max price -->
                                     <div class="col-6">
                                         <div class="input-group mb-2">
                                             <span class="input-group-text">Max</span>
-                                            <input type="number" class="form-control" id="max_price" name="max_price" value="1000" min="0">
+                                            <input type="number" class="form-control" id="max_price" name="max_price" value="{{ cached_form.max_price or 1000 }}" min="0">
                                         </div>
-                                        <input type="range" class="form-range" id="price_slider_max" min="0" max="2000" step="10" value="1000"
+                                        <input type="range" class="form-range" id="price_slider_max" min="0" max="2000" step="10" value="{{ cached_form.max_price or 1000 }}"
                                             oninput="syncPriceInputs()">
                                     </div>
                                 </div>
@@ -174,39 +182,42 @@
                             <div class="mb-3">
                                 <label class="form-label d-block"><i class="fas fa-sort"></i> Sort by</label>
                                 <div class="btn-group w-100" role="group" aria-label="Sort Options">
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_none" value="" autocomplete="off" checked>
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_none" value="" autocomplete="off" checked {% if cached_form.sort_by == 'sort_none' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_none"><i class="fas fa-ban"></i> None</label>
 
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_price_asc" value="price_asc" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_price_asc" value="price_asc" autocomplete="off" {% if cached_form.sort_by == 'price_asc' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_price_asc"><i class="fas fa-arrow-up"></i> Price</label>
 
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_price_desc" value="price_desc" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_price_desc" value="price_desc" autocomplete="off" {% if cached_form.sort_by == 'price_desc' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_price_desc"><i class="fas fa-arrow-down"></i> Price</label>
 
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_departure_asc" value="departure_asc" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_departure_asc" value="departure_asc" autocomplete="off" {% if cached_form.sort_by == 'departure_asc' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_departure_asc"><i class="fas fa-clock"></i> Early</label>
                                     <!-- ! DA METTERE UN FILTRO PER QUANDO PARTIRE -->
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_departure_desc" value="departure_desc" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_departure_desc" value="departure_desc" autocomplete="off" {% if cached_form.sort_by == 'departure_desc' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_departure_desc"><i class="fas fa-clock"></i> Late</label>
 
-                                    <input type="radio" class="btn-check" name="sort_by" id="sort_duration_asc" value="duration_asc" autocomplete="off">
+                                    <input type="radio" class="btn-check" name="sort_by" id="sort_duration_asc" value="duration_asc" autocomplete="off" {% if cached_form.sort_by == 'duration_asc' %}checked{% endif %}>
                                     <label class="btn btn-outline-secondary" for="sort_duration_asc"><i class="fas fa-stopwatch"></i> Shortest</label>
                                 </div>
                             </div>
 
                             <!-- Flight Class -->
-                            <div class="mb-4">
+                            <!-- <div class="mb-4">
                                 <label for="class" class="form-label">Class</label>
                                 <select id="class" name="flight_class" required class="form-select">
                                     <option value="economy">Economy</option>
                                     <option value="business">Business</option>
                                     <option value="first_class">First Class</option>
                                 </select>
-                            </div>
+                            </div> -->
 
                             <div class="text-center">
                                 <button type="submit" name="search" class="btn btn-primary">
                                     <i class="fas fa-search"></i> Search
+                                </button>
+                                <button type="submit" name="reset" value="1" class="btn btn-secondary ms-2">
+                                    <i class="fas fa-undo"></i> Reset Search
                                 </button>
                             </div>
                         </form>
@@ -230,7 +241,11 @@
                                     <p class="card-text">
                                         <strong>Departure:</strong> {{ flight[0].departure_time }}<br>
                                         <strong>Arrival:</strong> {{ flight[0].arrival_time }}<br>
-                                        <strong>Price:</strong> €{{ flight[0].selected_price }}
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span><strong>Economy:</strong> €{{ flight[0].economy_price }}</span>
+                                            <span><strong>Business:</strong> €{{ flight[0].business_price }}</span>
+                                            <span><strong>First Class:</strong> €{{ flight[0].first_class_price }}</span>
+                                        </div>
                                     </p>
                                     {% if current_user.is_anonymous or current_user.role == current_user.role.PASSENGER %}
                                         <a href="{{ url_for('flight_details', flight_id=flight[0].id) }}" class="btn btn-outline-primary w-100">
@@ -243,11 +258,20 @@
                                     <h5 class="card-title"><i class="fas fa-random"></i> Connecting Flight</h5>
                                     <p class="card-text">
                                         <strong>First Leg:</strong> {{ first_flight.departure_airport }} → {{ first_flight.destination_airport }}<br>
-                                        Departure: {{ first_flight.departure_time }}<br><br>
+                                        Departure: {{ first_flight.departure_time }}<br>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span><strong>Economy:</strong> €{{ first_flight.economy_price }}</span>
+                                            <span><strong>Business:</strong> €{{ first_flight.business_price }}</span>
+                                            <span><strong>First Class:</strong> €{{ first_flight.first_class_price }}</span>
+                                        </div>
                                         <strong>Connection:</strong> {{ second_flight.departure_airport }} → {{ second_flight.destination_airport }}<br>
                                         Departure: {{ second_flight.departure_time }}<br>
-                                        Arrival: {{ second_flight.arrival_time }}<br><br>
-                                        <strong>Total Price:</strong> €{{ first_flight.selected_price + second_flight.selected_price }}
+                                        Arrival: {{ second_flight.arrival_time }}<br>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span><strong>Economy:</strong> €{{ second_flight.economy_price }}</span>
+                                            <span><strong>Business:</strong> €{{ second_flight.business_price }}</span>
+                                            <span><strong>First Class:</strong> €{{ second_flight.first_class_price }}</span>
+                                        </div>
                                     </p>
                                     {% if current_user.is_anonymous or current_user.role == current_user.role.PASSENGER %}
                                         <div class="d-flex gap-2">
@@ -271,8 +295,24 @@
             </div>
         {% endif %}
     </div>
+
+    <!-- Script per selezionare di default la data odierna e impedire all'utente di selezionare una data passata -->
+    <script>
+        const now = new Date();
+        const pad = n => n.toString().padStart(2, '0');
+        const localISOTime = now.getFullYear() + '-' +
+            pad(now.getMonth() + 1) + '-' +
+            pad(now.getDate()) + 'T' +
+            pad(now.getHours()) + ':' +
+            pad(now.getMinutes());
+        const dateInput = document.getElementById("departure_date");
+        if (dateInput) {
+            dateInput.setAttribute("min", localISOTime);
+        }
+    </script>
     
     <!-- Bootstrap Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+ 

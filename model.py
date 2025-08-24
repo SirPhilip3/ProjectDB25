@@ -122,13 +122,13 @@ class Flight(db.Model):
     # destination_airport_id: Mapped[int] = mapped_column(ForeignKey('airports.id'), nullable=False)
 
     # Constraints
-    table_args = (
+    __table_args__ = (
         CheckConstraint('departure_airport != destination_airport', name='check_different_airports'),
         CheckConstraint('arrival_time > departure_time', name='check_arrival_after_departure'),
         CheckConstraint('economy_price >= 0', name='check_non_negative_economy_price'),
         CheckConstraint('business_price >= 0', name='check_non_negative_business_price'),
         CheckConstraint('first_class_price >= 0', name='check_non_negative_first_class_price'),
-        Index('idx_flight_route_time', 'departure_airport_id', 'destination_airport_id', 'departure_time'),
+        # Index('idx_flight_route_time', 'departure_airport_id', 'destination_airport_id', 'departure_time'),
         Index('idx_flight_airline_time', 'airline_id', 'departure_time'),
     )
 

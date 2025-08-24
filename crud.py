@@ -4,7 +4,7 @@ from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased 
 from sqlalchemy import text,func,desc
 from flask import flash, redirect, url_for
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 def carica_triggers():
     with open('triggers.sql', 'r') as file:
@@ -36,7 +36,7 @@ def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,depa
     except Exception as e:
         print(f"Error adding flight {e}")
         db.session.rollback()
-        return redirect(url_for('add_flight_page'))
+        return None
 
 # Aggiunge un aereoplano al database, ritorna il nuovo aereo
 def add_airplane(model, capacity, economy_seats, business_seats, first_class_seats, airline_id):
@@ -77,71 +77,80 @@ def delete_ticket_by_id(ticket_id):
 
 # Ritorna i voli diretti e/o indiretti filtrati con i parametri corrispondenti
 #! da rivedere l'implemetazione
-def search_flight(departure, arrival, direct_flight, class_type, min_price=None, max_price=None, sort_by=None):
-#     if direct_flight:
-#         query = Flight.query.filter(
-#             Flight.departure_airport == departure, 
-#             Flight.destination_airport == arrival)
-#     else:
+# def search_flight(departure, arrival, direct_flight, class_type, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now()):
+#     flights = Flight.query.filter(
+#         Flight.departure_airport == departure, 
+#         Flight.destination_airport == arrival,
+#         Flight.departure_time >= departure_date,
+#     ).all()
+#     # Converto i voli diretti in coppiedi voli dove il secondo è None
+#     flights = [(flight, None) for flight in flights]
+
+#     if not direct_flight:
 #         F1 = aliased(Flight)
 #         F2 = aliased(Flight)
-#         query = db.session.query(F1, F2).filter(
+#         flights_aux = db.session.query(F1, F2).filter(
 #             F1.departure_airport == departure,
 #             F1.destination_airport == F2.departure_airport,
 #             F2.destination_airport == arrival,
+#             F1.departure_time >= departure_date,
 #             # devono essere separati da almeno 2 ore , potremmo aggiungere un limite massimo
-#             F2.departure_time >= F1.arrival_time + timedelta(hours=2))
+#             F2.departure_time >= F1.arrival_time + timedelta(hours=2)).all()
+#         # Aggiungo in coda ai voli diretti i voli con scalo
+#         flights.extend(flights_aux)
+
+#     # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
+#     for first_flight, second_flight in flights:
+#         first_flight.selected_class = class_type
+#         first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
+#         if second_flight:
+#             second_flight.selected_class = class_type
+#             second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
     
 #     # Filtri per prezzo
-#     #! implementazione diversa per i voli con uno stop 
 #     if min_price:
 #         min_price = float(min_price)
 #         price_field = getattr(Flight, f"{class_type}_price")
-#         query = query.filter(price_field >= min_price)
-    
+#         flights = [(f1, f2) for f1, f2 in flights if (
+#             (f2 is None and f1.selected_price >= min_price) or 
+#             (f2 is not None and (f1.selected_price + f2.selected_price) >= min_price))]
 #     if max_price:
 #         max_price = float(max_price)
 #         price_field = getattr(Flight, f"{class_type}_price")
-#         query = query.filter(price_field <= max_price)
+#         flights = [(f1, f2) for f1, f2 in flights if (
+#         (f2 is None and f1.selected_price <= max_price) or 
+#         (f2 is not None and (f1.selected_price + f2.selected_price) <= max_price))]
     
 #     # Ordinamento
 #     if sort_by:
 #         if sort_by == 'price_asc':
 #             price_field = getattr(Flight, f"{class_type}_price")
-#             query = query.order_by(price_field.asc())
+#             flights.sort(key=lambda pair: (
+#             pair[0].selected_price if pair[1] is None 
+#             else pair[0].selected_price + pair[1].selected_price))
 #         elif sort_by == 'price_desc':
 #             price_field = getattr(Flight, f"{class_type}_price")
-#             query = query.order_by(price_field.desc())
+#             flights.sort(key=lambda pair: (
+#             pair[0].selected_price if pair[1] is None 
+#             else pair[0].selected_price + pair[1].selected_price), reverse=True)
 #         elif sort_by == 'departure_asc':
-#             query = query.order_by(Flight.departure_time.asc())
+#             flights.sort(key=lambda pair: pair[0].departure_time)
 #         elif sort_by == 'departure_desc':
-#             query = query.order_by(Flight.departure_time.desc())
+#             flights.sort(key=lambda pair: pair[0].departure_time,reverse=True)
 #         elif sort_by == 'duration_asc':
-#             query = query.order_by((Flight.arrival_time - Flight.departure_time).asc())
-    
-#     # Esegui la query
-#     flights = query.all()
-    
-#     #! implementazione diversa per i voli con uno stop 
-#     if direct_flight:
-#         # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-#         for flight in flights:
-#             flight.selected_class = class_type
-#             flight.selected_price = getattr(flight, f"{class_type}_price")
-#     else:
-#         # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-#         for first_flight, second_flight in flights:
-#             first_flight.selected_class = class_type
-#             first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
-#             second_flight.selected_class = class_type
-#             second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
-    
+#             flights.sort(key=lambda pair: ((pair[0].arrival_time - pair[0].departure_time).total_seconds()
+#             if pair[1] is None else (pair[1].arrival_time - pair[0].departure_time).total_seconds()))
+
+#     print(flights)
 #     return flights
 
+def search_flight(departure, arrival, direct_flight, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now()):
     flights = Flight.query.filter(
-        Flight.departure_airport== departure, 
-        Flight.destination_airport == arrival).all()
-    # Converto i voli diretti in coppiedi voli dove il secondo è None
+        Flight.departure_airport == departure, 
+        Flight.destination_airport == arrival,
+        Flight.departure_time >= departure_date,
+    ).all()
+    # Converto i voli diretti in coppie di voli dove il secondo è None
     flights = [(flight, None) for flight in flights]
 
     if not direct_flight:
@@ -151,52 +160,65 @@ def search_flight(departure, arrival, direct_flight, class_type, min_price=None,
             F1.departure_airport == departure,
             F1.destination_airport == F2.departure_airport,
             F2.destination_airport == arrival,
-            # devono essere separati da almeno 2 ore , potremmo aggiungere un limite massimo
-            F2.departure_time >= F1.arrival_time + timedelta(hours=2)).all()
-        # Aggiungo in coda ai voli diretti i voli con scalo
+            F1.departure_time >= departure_date,
+            F2.departure_time >= F1.arrival_time + timedelta(hours=2)
+        ).all()
         flights.extend(flights_aux)
 
-    # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-    for first_flight, second_flight in flights:
-        first_flight.selected_class = class_type
-        first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
-        if second_flight:
-            second_flight.selected_class = class_type
-            second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
-    
-    # Filtri per prezzo
+    # Filtri per prezzo su almeno una classe (economy, business, first_class)
     if min_price:
         min_price = float(min_price)
-        price_field = getattr(Flight, f"{class_type}_price")
-        flights = [(f1, f2) for f1, f2 in flights if (
-            (f2 is None and f1.selected_price >= min_price) or 
-            (f2 is not None and (f1.selected_price + f2.selected_price) >= min_price))]
+        flights = [
+            (f1, f2) for f1, f2 in flights if (
+                (f2 is None and (
+                    f1.economy_price >= min_price or
+                    f1.business_price >= min_price or
+                    f1.first_class_price >= min_price
+                )) or
+                (f2 is not None and (
+                    (f1.economy_price + f2.economy_price) >= min_price or
+                    (f1.business_price + f2.business_price) >= min_price or
+                    (f1.first_class_price + f2.first_class_price) >= min_price
+                ))
+            )
+        ]
     if max_price:
         max_price = float(max_price)
-        price_field = getattr(Flight, f"{class_type}_price")
-        flights = [(f1, f2) for f1, f2 in flights if (
-        (f2 is None and f1.selected_price <= max_price) or 
-        (f2 is not None and (f1.selected_price + f2.selected_price) <= max_price))]
-    
-    # Ordinamento
+        flights = [
+            (f1, f2) for f1, f2 in flights if (
+                (f2 is None and (
+                    f1.economy_price <= max_price or
+                    f1.business_price <= max_price or
+                    f1.first_class_price <= max_price
+                )) or
+                (f2 is not None and (
+                    (f1.economy_price + f2.economy_price) <= max_price or
+                    (f1.business_price + f2.business_price) <= max_price or
+                    (f1.first_class_price + f2.first_class_price) <= max_price
+                ))
+            )
+        ]
+
+    # Ordinamento (puoi scegliere su quale classe ordinare, qui esempio su economy)
     if sort_by:
         if sort_by == 'price_asc':
-            price_field = getattr(Flight, f"{class_type}_price")
             flights.sort(key=lambda pair: (
-            pair[0].selected_price if pair[1] is None 
-            else pair[0].selected_price + pair[1].selected_price))
+                pair[0].economy_price if pair[1] is None 
+                else pair[0].economy_price + pair[1].economy_price))
         elif sort_by == 'price_desc':
-            price_field = getattr(Flight, f"{class_type}_price")
             flights.sort(key=lambda pair: (
-            pair[0].selected_price if pair[1] is None 
-            else pair[0].selected_price + pair[1].selected_price), reverse=True)
+                pair[0].economy_price if pair[1] is None 
+                else pair[0].economy_price + pair[1].economy_price), reverse=True)
         elif sort_by == 'departure_asc':
             flights.sort(key=lambda pair: pair[0].departure_time)
         elif sort_by == 'departure_desc':
-            flights.sort(key=lambda pair: pair[0].departure_time,reverse=True)
+            flights.sort(key=lambda pair: pair[0].departure_time, reverse=True)
         elif sort_by == 'duration_asc':
-            flights.sort(key=lambda pair: ((pair[0].arrival_time - pair[0].departure_time).total_seconds()
-            if pair[1] is None else (pair[1].arrival_time - pair[0].departure_time).total_seconds()))
+            flights.sort(key=lambda pair: (
+                (pair[0].arrival_time - pair[0].departure_time).total_seconds()
+                if pair[1] is None else
+                (pair[1].arrival_time - pair[0].departure_time).total_seconds()
+            ))
 
     print(flights)
     return flights
@@ -325,7 +347,6 @@ def get_airline_top_routes(airline_id, limit=10):
         return []
 
 
-
 #! da testare
 def get_airline_class_distribution(airline_id):
     """
@@ -383,6 +404,24 @@ def get_remaining_ticket_count_by_flight(flight_id):
         }
     except Exception as e:
         print(f"Error getting ticket count by flight {e}")
+
+
+def get_occupied_seats(flight_id):
+    """
+    Ottiene i posti occupati per un volo specifico
+    """
+    flight_id = str(flight_id)
+    try:
+        occupied_seats = db.session.query(
+            Ticket.seat_number
+        ).join(
+            Flight, Ticket.flight_id == Flight.id
+        ).filter(
+            Flight.id == flight_id
+        ).all()
+        return [seat[0] for seat in occupied_seats]
+    except Exception as e:
+        print(f"Error getting occupied seats for flight {flight_id}: {e}")
 
 #! non usato 
 # def search_airport(name, city, iata_code):
