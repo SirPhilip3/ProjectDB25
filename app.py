@@ -268,6 +268,7 @@ def flight_details(flight_id):
         return redirect(url_for('hello_world'))
 
     available_tickets = get_remaining_ticket_count_by_flight(flight_id)
+    # print(f"Available tickets: {available_tickets}")
     occupied_seats = get_occupied_seats(flight_id)
     # occupied_seats = []
     if request.method == 'POST':

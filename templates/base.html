@@ -124,16 +124,16 @@
                                             <span class="input-group-text">Min</span>
                                             <input type="number" class="form-control" id="min_price" name="min_price"  value="{{ cached_form.min_price or 0 }}" min="0">
                                         </div>
-                                        <input type="range" class="form-range" id="price_slider_min" min="0" max="2000" step="10" value="{{ cached_form.min_price or 0 }}"
+                                        <input type="range" class="form-range" id="price_slider_min" min="0" max="4000" step="1" value="{{ cached_form.min_price or 0 }}"
                                             oninput="syncPriceInputs()">
                                     </div>
                                     <!-- Max price -->
                                     <div class="col-6">
                                         <div class="input-group mb-2">
                                             <span class="input-group-text">Max</span>
-                                            <input type="number" class="form-control" id="max_price" name="max_price" value="{{ cached_form.max_price or 1000 }}" min="0">
+                                            <input type="number" class="form-control" id="max_price" name="max_price" value="{{ cached_form.max_price or 4000 }}" min="0">
                                         </div>
-                                        <input type="range" class="form-range" id="price_slider_max" min="0" max="2000" step="10" value="{{ cached_form.max_price or 1000 }}"
+                                        <input type="range" class="form-range" id="price_slider_max" min="0" max="4000" step="1" value="{{ cached_form.max_price or 4000 }}"
                                             oninput="syncPriceInputs()">
                                     </div>
                                 </div>

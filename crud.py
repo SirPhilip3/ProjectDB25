@@ -324,7 +324,14 @@ def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_ext
         return False
 
 def get_airplanes_by_airline(airline_id):
-    return Airplane.query.filter_by(airline_id=airline_id).all()
+    """
+    Ritorna tutti gli aerei di una specifica compagnia aerea
+    """
+    try:
+        return Airplane.query.filter_by(airline_id=airline_id).all()
+    except Exception as e:
+        print(f"Error getting airplanes by airline id {airline_id}: {e}")
+        return []
 
 def get_user_tickets(user_id):
     """

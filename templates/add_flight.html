@@ -84,15 +84,15 @@
               <h5 class="mt-4"><i class="fas fa-euro-sign"></i> Ticket Prices</h5>
               <div class="mb-3">
                 <label for="price_economy" class="form-label">Economy</label>
-                <input type="number" class="form-control" name="price_economy" id="price_economy" required>
+                <input type="number" class="form-control" name="price_economy" id="price_economy" min="0" required>
               </div>
               <div class="mb-3">
                 <label for="price_business" class="form-label">Business</label>
-                <input type="number" class="form-control" name="price_business" id="price_business" required>
+                <input type="number" class="form-control" name="price_business" id="price_business" min="0" required>
               </div>
               <div class="mb-3">
                 <label for="price_first" class="form-label">First Class</label>
-                <input type="number" class="form-control" name="price_first" id="price_first" required>
+                <input type="number" class="form-control" name="price_first" id="price_first" min="0" required>
               </div>
 
               <!-- Extras -->
@@ -102,7 +102,7 @@
                   <span class="input-group-text"><i class="fas fa-tag"></i></span>
                   <input type="text" class="form-control" name="extra_name_1" placeholder="Extra Name">
                   <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
-                  <input type="number" class="form-control" name="extra_price_1" placeholder="Extra Price">
+                  <input type="number" class="form-control" name="extra_price_1" min="0" placeholder="Extra Price">
                 </div>
               </div>
               <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addExtra()">
