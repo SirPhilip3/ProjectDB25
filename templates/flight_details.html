@@ -41,7 +41,6 @@
     .seat-selected { box-shadow: 0 0 0 3px #2563eb; border-color: #2563eb; }
 </style>
 <body>
-    <!-- Navbar (puoi includere qui il codice della navbar se non usi extends) -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('hello_world') }}">
@@ -163,7 +162,7 @@
                             </div>
                             <input type="hidden" name="flight_id" value="{{ flight.id }}">
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-success btn-lg" id="buy-ticket-btn" disabled>
                                     <i class="fas fa-ticket-alt"></i> Buy Ticket
                                 </button>
                                 <p class="text-center text-muted mt-2">Operated by <strong>{{ flight.airline.name }}</strong></p>
@@ -282,7 +281,7 @@
 
     function setBasePrice(seatClass) {
         document.getElementById('base-price').textContent = (flightPrices[seatClass] || 0).toFixed(2);
-        updateTotalPrice(); // AGGIUNGI QUESTA RIGA
+        updateTotalPrice(); 
     }
 
     function updateTotalPrice() {
@@ -304,10 +303,25 @@
         document.getElementById('total-price').textContent = (basePrice + extrasPrice).toFixed(2);
     }
 
+    function enableBuyButtonIfSeatSelected() {
+        const seatInput = document.getElementById('seat_number');
+        const buyBtn = document.getElementById('buy-ticket-btn');
+        if (seatInput && buyBtn) {
+            buyBtn.disabled = !seatInput.value;
+        }
+    }
+
     // document.getElementById('class').addEventListener('change', updateTotalPrice);
     document.addEventListener('DOMContentLoaded', function() {
         renderSeatGrid();
         updateTotalPrice();
+        enableBuyButtonIfSeatSelected();
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('seat-box') && !e.target.classList.contains('seat-occupied')) {
+            enableBuyButtonIfSeatSelected();
+        }
     });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

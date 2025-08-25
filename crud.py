@@ -423,6 +423,24 @@ def get_occupied_seats(flight_id):
     except Exception as e:
         print(f"Error getting occupied seats for flight {flight_id}: {e}")
 
+def get_airline_info(airline_id):
+    """
+    Ottiene le informazioni su una compagnia aerea specifica
+    """
+    try:
+        airline = Airline.query.get(airline_id)
+        if airline:
+            return {
+                'name': airline.name,
+                'email': airline.user.email,
+                # 'phone': airline.phone,
+                # 'address': airline.address
+            }
+        return None
+    except Exception as e:
+        print(f"Error getting airline info {e}")
+        return None
+
 #! non usato 
 # def search_airport(name, city, iata_code):
 #     """

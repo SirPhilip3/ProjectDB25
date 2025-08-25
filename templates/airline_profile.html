@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airline Dashboard - SkyLine Airways</title>
+    <title>Airline Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='static/style.css') }}" rel="stylesheet">
@@ -12,9 +12,33 @@
     <div class="container py-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2><i class="fas fa-building"></i> My Airline Dashboard</h2>
-            <a href="/logout" class="btn btn-outline-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <div>
+                <a href="{{ url_for('hello_world') }}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-search"></i> Search a Flight
+                </a>
+                <a href="/logout" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <!-- Company Info Section -->
+        <div class="auth-card fade-in-up mb-4">
+            <div class="auth-header">
+                <h4><i class="fas fa-building"></i> Airline Company Details</h4>
+            </div>
+            <div class="p-3">
+                {% if airline_info %}
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item py-1"><strong>Name:</strong> {{ airline_info.name }}</li>
+                        <li class="list-group-item py-1"><strong>Email:</strong> {{ airline_info.email }}</li>
+                        <li class="list-group-item py-1"><strong>Phone:</strong> {{ airline_info.phone }}</li>
+                        <li class="list-group-item py-1"><strong>Address:</strong> {{ airline_info.address }}</li>
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No company information available.</p>
+                {% endif %}
+            </div>
         </div>
         
         <!-- Analytics Section -->
@@ -199,39 +223,8 @@
                 </button>
             </div>
         </div>
-
-     
-
-
-           <div class="d-flex justify-content-between align-items-center mb-4">
-    <div class="d-flex align-items-center">
-        <!-- Freccia indietro -->
-        <a href="javascript:history.back()" class="text-decoration-none me-3 fs-4" title="Back">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <!-- Freccia home -->
-        <a href="{{ url_for('hello_world') }}" class="text-decoration-none fs-4" title="Home">
-            <i class="fas fa-home"></i>
-        </a>
-    </div>
-  
-    <div>
-        <a href="/logout" class="btn btn-outline-danger">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
     </div>
 </div>
-
-
-
-
-        <!-- Back to Search -->
-        <div class="text-center mt-4">
-            <a href="{{ url_for('hello_world') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-search"></i> Search a Flight
-            </a>
-        </div>
-    </div>
 
 
     

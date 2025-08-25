@@ -104,7 +104,7 @@ def user():
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
     else:
-        return "<p>You are not authorized to view this page.</p>"
+        return render_template('unauthorized.html')
 
 # information about the airline
 #! protrei entrare quando faccio back 
@@ -114,6 +114,8 @@ def airline_profile(airline_id):
     #! maybe fare una funzione a parte per questo check
     if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
+        airline_info = get_airline_info(current_user.airline_profile.id)
+
         flights = get_flights_by_airline(current_user.airline_profile.id)
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
 
@@ -125,12 +127,12 @@ def airline_profile(airline_id):
         # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
         # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
         # aggiunge headers per disabilitare la cache
-        response = make_response(render_template('airline_profile.html', flights=flights, airplanes=airplanes, class_distribution=class_distribution, top_routes=top_routes, n_flights=n_flights, n_airplanes=n_airplanes, n_tickets=n_tickets, tot_revenue=tot_revenue))
+        response = make_response(render_template('airline_profile.html', airline_info=airline_info, flights=flights, airplanes=airplanes, class_distribution=class_distribution, top_routes=top_routes, n_flights=n_flights, n_airplanes=n_airplanes, n_tickets=n_tickets, tot_revenue=tot_revenue))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         
         return response
     else:
-        return "<p>You are not authorized to view this page.</p>"
+        render_template('unauthorized.html')
 
 # Per eliminare una tratta come compagnia aerea
 @app.route("/delete_flight", methods=['POST'])
@@ -212,15 +214,15 @@ def add_flight_page():
             new_flight = add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
             
             if new_flight:
-                flash("✅ Flight added successfully.", "success")
+                flash("Flight added successfully.", "success")
             else:
-                flash("❌ Error: flight could not be added.", "danger")
+                flash("Error: flight could not be added.", "danger")
 
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
         
         return render_template('add_flight.html', airplanes=airplanes)
     else:
-        return "<p>You are not authorized to view this page.</p>"
+        return render_template('unauthorized.html')
 
 # Per aggiungere un aereo come compagnia aerea
 @app.route("/add_airplane", methods=['GET', 'POST'])
@@ -237,7 +239,7 @@ def add_airplane_page():
             add_airplane(model, capacity, seats_economy, seats_business, seats_first, current_user.airline_profile.id)
         return render_template('add_airplane.html')
     else:
-        return "<p>You are not authorized to view this page.</p>"
+        return render_template('unauthorized.html')
 
 # Per prenotare un biglietto 
 @app.route("/flight/<uuid:flight_id>", methods=['GET', 'POST'])
