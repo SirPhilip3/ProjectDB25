@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash , Bl
 from database import db, app 
 from model import User, UserRole, Airline
 import uuid
+from crud import decode_sql_errors
 
 auth = Blueprint('auth', __name__)
 
@@ -25,7 +26,7 @@ def login ():
         
         if user and check_password_hash(user.password, password):
             login_user(user)
-            flash('Login successful!')
+            flash('Login successful!', 'success')
             if user.role == UserRole.AIRLINE:
                 return redirect(url_for('airline_profile', airline_id=user.id))
             elif user.role == UserRole.PASSENGER:
@@ -41,7 +42,7 @@ def login ():
                 #     return redirect(url_for('flight_details', flight_id=request.args.get('flight')))
                 return redirect(url_for('hello_world')) # ritorna alla lista dei voli (potremmo far tornare a pagina specifica dello user)
         else:
-            flash('Invalid username or password')
+            flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
     return render_template("/auth/login.html")
 
@@ -58,49 +59,57 @@ def register ():
         # se l'utente è un airline, richiedi anche il nome della compagnia aerea
         airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
 
-
-      
-
         # Controlla se email è già usata
         if User.query.filter_by(email=email).first():
-            flash('This email is already registered.', 'error')
+            flash('This email is already registered.', 'danger')
             return redirect(url_for('register'))
 
         # Controlla se airline name esiste già
         if role == UserRole.AIRLINE and Airline.query.filter_by(name=airline_name).first():
-            flash('Airline name already exists.', 'error')
+            flash('Airline name already exists.', 'danger')
             return redirect(url_for('register'))
-
-
-        
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(email=email, role=role, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
+        try :
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            error_msg = decode_sql_errors(e)
+            flash(f"Error creating user: {error_msg}", 'danger')
+            print(f"Error occurred: {e}")
 
         if role == UserRole.AIRLINE:
             if not airline_name:
-                flash('Airline Name is required for Airline role.')
+                flash('Airline Name is required for Airline role.', 'danger')
                 return redirect(url_for('register'))
             if Airline.query.filter_by(name=airline_name).first():
-                flash('Airline name already exists.')
+                flash('Airline name already exists.', 'danger')
                 return redirect(url_for('register'))
             
             new_airline = Airline(name=airline_name, user_id=new_user.id)
             new_user.airline_profile = new_airline
-            db.session.add(new_airline)
-            db.session.commit()
-        
-        flash('Registration successful! Please log in.')
+            try :
+                db.session.add(new_airline)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                error_msg = decode_sql_errors(e)
+                flash(f"Error creating airline profile: {error_msg}", 'danger')
+                print(f"Error occurred: {e}")
+
+        flash('Registration successful! Please log in.', 'success')
+
         return redirect(url_for('login'))
+    
     return render_template("/auth/register.html")
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    # flash('Logged out successfully.')
+    flash('Logged out successfully.', 'success')
     return redirect(url_for('hello_world'))
 
 

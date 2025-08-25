@@ -210,16 +210,30 @@ def add_flight_page():
                         })
                     else :
                         print(f"Extra {value} has no price, skipping.")
+            try :
+                new_flight = add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
+                if new_flight:
+                    flash("Flight added successfully.", "success")
+            except Exception as e:
+                flash(f"Error: {e}", "danger")
             
-            new_flight = add_flight(current_user.airline_profile.id, airplane_id, departure_airport, arrival_airport, departure_time, arrival_time, economy_price, business_price, first_class_price, extras)
-            
-            if new_flight:
-                flash("Flight added successfully.", "success")
-            else:
-                flash("Error: flight could not be added.", "danger")
+            # if new_flight:
+            #     flash("Flight added successfully.", "success")
+            # else:
+            #     flash("Error: flight could not be added.", "danger")
 
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
         
+        # ! test falshes
+        # flash("This is a primary message", "primary")
+        # flash("This is a secondary message", "secondary")
+        # flash("This is a success message", "success")
+        # flash("This is a danger message", "danger")
+        # flash("This is a warning message", "warning")
+        # flash("This is an info message", "info")
+        # flash("This is a light message", "light")
+        # flash("This is a dark message", "dark")
+
         return render_template('add_flight.html', airplanes=airplanes)
     else:
         return render_template('unauthorized.html')
@@ -250,7 +264,7 @@ def flight_details(flight_id):
     message = None
 
     if current_user.role != UserRole.PASSENGER:
-        flash('Only passengers can book tickets.', 'error')
+        flash('Only passengers can book tickets.', 'danger')
         return redirect(url_for('hello_world'))
 
     available_tickets = get_remaining_ticket_count_by_flight(flight_id)
@@ -268,7 +282,7 @@ def flight_details(flight_id):
         elif seat_letter == 'F':
             ticket_class = 'first_class'
         else:
-            error = "Invalid seat number format."
+            message = "Invalid seat number format."
 
         print(f"Attempting to book ticket: {flight_id}, {seat_number}")
 
@@ -284,7 +298,7 @@ def flight_details(flight_id):
                 else :
                     print("Invalid extra selected")
 
-        ticket , message = book_ticket(
+        ticket = book_ticket(
             flight_id=flight_id,
             passenger_id=current_user.id,
             ticket_class=ticket_class,
@@ -307,11 +321,11 @@ def flight_details(flight_id):
             # per ora torno alla pagina principale
             return redirect(url_for('hello_world'))
         else:
-            db.session.rollback()
-            flash(f'Booking failed: {message}', 'error')
-            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets, seat_status=occupied_seats)
+            # db.session.rollback()
+            print(f'Booking failed: {message}')
+            return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, available_tickets=available_tickets, seat_status=occupied_seats)
 
-    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, error=message, available_tickets=available_tickets, seat_status=occupied_seats)
+    return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, available_tickets=available_tickets, seat_status=occupied_seats)
 
 
 if __name__ == '__main__':

@@ -15,6 +15,29 @@ def carica_triggers():
                 if stmt:
                     connection.execute(text(stmt))
 
+def decode_sql_errors(e):
+    """
+    Translate known SQL errors (e.g., from triggers or constraints) into user-friendly messages.
+    """
+    error_message = str(e)
+    error_map = {
+        "check_arrival_after_departure": "Arrival time must be after departure time.",
+        "check_capacity_seats_sum": "Total seats must match airplane capacity.",
+        "trigger_overlap": "Overlapping flights for the same airplane.",
+        "check_non_negative_first_class_price": "First class price needs to be positive",
+        "check_non_negative_economy_price" : "Economy price needs to be positive",
+        "check_non_negative_business_price" : "Business price needs to be positive",
+        "check_different_airports": "Departure and arrival airports must be different.",
+        "check_arrival_after_departure": "Arrival time must be after departure time.",
+        "trigger_check_seat_availability" : "No seats available.",
+        "unique_seat_per_flight" : "Seat must be unique for each flight."
+    }
+    for key, user_msg in error_map.items():
+        if key in error_message:
+            return user_msg
+    # Default: return a generic message
+    return "An unexpected database error occurred. Please check your input."
+
 # Aggiunge una tratta al database , ritorna il nuovo volo
 def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,departure_time, arrival_time, economy_price, business_price, first_class_price, extras=None):
     new_flight = Flight(
@@ -34,6 +57,8 @@ def add_flight(airline_id, airplane_id, departure_airport, arrival_airport ,depa
         db.session.commit()
         return new_flight
     except Exception as e:
+        error_message = decode_sql_errors(e)
+        flash(f"Error adding flight: {error_message}", 'danger')
         print(f"Error adding flight {e}")
         db.session.rollback()
         return None
@@ -53,27 +78,50 @@ def add_airplane(model, capacity, economy_seats, business_seats, first_class_sea
         db.session.commit()
         return new_airplane
     except Exception as e:
+        error_message = decode_sql_errors(e)
+        flash(f"Error adding airplane: {error_message}", 'danger')
         print(f"Error adding airplane {e}")
         db.session.rollback()
         return redirect(url_for('add_airplane_page'))
 
 def delete_flight_by_id(flight_id):
-    flight = Flight.query.get(flight_id)
-    if flight:
-        db.session.delete(flight)
-        db.session.commit()
+    try:
+        flight = Flight.query.get(flight_id)
+        if flight:
+            db.session.delete(flight)
+            db.session.commit()
+        else:
+            flash("Flight not found", 'warning')
+            print("Flight not found")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Errore durante l'eliminazione: {e}")
 
 def delete_airplane_by_id(airplane_id):
-    airplane = Airplane.query.get(airplane_id)
-    if airplane:
-        db.session.delete(airplane)
-        db.session.commit()
+    try:
+        airplane = Airplane.query.get(airplane_id)
+        if airplane:
+            db.session.delete(airplane)
+            db.session.commit()
+        else:
+            flash("Airplane not found", 'warning')
+            print("Airplane not found")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Errore durante l'eliminazione: {e}")
 
 def delete_ticket_by_id(ticket_id):
-    ticket = Ticket.query.get(ticket_id)
-    if ticket:
-        db.session.delete(ticket)
-        db.session.commit()
+    try:
+        ticket = Ticket.query.get(ticket_id)
+        if ticket:
+            db.session.delete(ticket)
+            db.session.commit()
+        else:
+            flash("Ticket not found", 'warning')
+            print("Ticket not found")
+    except Exception as e:
+        db.session.rollback()
+        print(f"Errore durante l'eliminazione: {e}")
 
 # Ritorna i voli diretti e/o indiretti filtrati con i parametri corrispondenti
 #! da rivedere l'implemetazione
@@ -225,11 +273,19 @@ def search_flight(departure, arrival, direct_flight, min_price=None, max_price=N
 
 #Ritorna un volo specifico con l'id corrispondente
 def get_flight_by_id(flight_id):
-    return Flight.query.get(flight_id)
+    try:
+        return Flight.query.get(flight_id)
+    except Exception as e:
+        print(f"Error getting flight by id {flight_id}: {e}")
+        return None
 
 #Ritorna tutti i voli di una specifica compagnia aerea
 def get_flights_by_airline(airline_id): 
-    return Flight.query.filter(Flight.airline_id == airline_id).all()
+    try :
+        return Flight.query.filter(Flight.airline_id == airline_id).all()
+    except Exception as e:
+        print(f"Error getting flights by airline id {airline_id}: {e}")
+        return []
 
 # Aggiunge un biletto al database
 def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_extras=None):
@@ -259,10 +315,13 @@ def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_ext
             )
         db.session.add(new_ticket)
         db.session.commit()
-        return True , None 
+        return True
     except Exception as e:
         db.session.rollback()
-        return False , "Seat already booked."
+        error = decode_sql_errors(e)
+        flash(f"Error booking ticket: {error}", 'danger')
+        print(f"Error booking ticket {e}")
+        return False
 
 def get_airplanes_by_airline(airline_id):
     return Airplane.query.filter_by(airline_id=airline_id).all()
