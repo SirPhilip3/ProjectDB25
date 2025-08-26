@@ -192,25 +192,31 @@ def delete_ticket_by_id(ticket_id):
 #     print(flights)
 #     return flights
 
-def search_flight(departure, arrival, direct_flight, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now()):
+def search_flight(departure, arrival, direct_flight, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now(), arrival_date=None):
     flights = Flight.query.filter(
         Flight.departure_airport == departure, 
         Flight.destination_airport == arrival,
         Flight.departure_time >= departure_date,
-    ).all()
+    )
+    if arrival_date:
+        flights = flights.filter(Flight.arrival_time <= arrival_date)
     # Converto i voli diretti in coppie di voli dove il secondo è None
+    flights.all()
     flights = [(flight, None) for flight in flights]
 
     if not direct_flight:
         F1 = aliased(Flight)
         F2 = aliased(Flight)
-        flights_aux = db.session.query(F1, F2).filter(
+        filters = [
             F1.departure_airport == departure,
             F1.destination_airport == F2.departure_airport,
             F2.destination_airport == arrival,
             F1.departure_time >= departure_date,
             F2.departure_time >= F1.arrival_time + timedelta(hours=2)
-        ).all()
+        ]
+        if arrival_date:
+            filters.append(F2.arrival_time <= arrival_date)
+        flights_aux = db.session.query(F1, F2).filter(*filters).all()
         flights.extend(flights_aux)
 
     # Filtri per prezzo su almeno una classe (economy, business, first_class)
@@ -422,8 +428,6 @@ def get_airline_class_distribution(airline_id):
         class_stats = db.session.query(
             Ticket.ticket_class,
             func.count(Ticket.id).label('count'),
-
-            
         ).join(
             Flight, Ticket.flight_id == Flight.id
         ).filter(
@@ -437,7 +441,6 @@ def get_airline_class_distribution(airline_id):
             distribution[stat.ticket_class] = {
                 'passengers': stat.count,
             }
-        
         return distribution
         
     except Exception as e:
@@ -499,8 +502,8 @@ def get_airline_info(airline_id):
             return {
                 'name': airline.name,
                 'email': airline.user.email,
-                # 'phone': airline.phone,
-                # 'address': airline.address
+                'phone': airline.user.phone,
+                'address': airline.user.address
             }
         return None
     except Exception as e:

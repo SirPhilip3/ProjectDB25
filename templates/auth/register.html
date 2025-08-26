@@ -46,6 +46,22 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number (Optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    <input type="phone" class="form-control" id="phone" name="phone">
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address (Optional)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-location-dot"></i></span>
+                                    <input type="address" class="form-control" id="address" name="address">
+                                </div>
+                            </div>
+
                             <div class="form-check mb-3">
                                 <input class="form-check-input" type="checkbox" id="role" name="role" value="true">
                                 <label class="form-check-label" for="role">
@@ -53,6 +69,25 @@
                                 </label>
                             </div>
 
+                            <!-- Nome e congnome se ci si vuole registrare come normale utente -->
+                            <div id="user-fields" style="display: block;">
+                                <div class="mb-3" id="firstname-field">
+                                    <label for="firstname" class="form-label">First name (Optional)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="firstname" name="firstname" placeholder="Enter your first name">
+                                    </div>
+                                </div>
+                                <div class="mb-3" id="lastname-field">
+                                    <label for="lastname" class="form-label">Last name (Optional)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="form-control" id="lastname" name="lastname" placeholder="Enter your last name">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Nome della compagnia se ci si vuole registrare come Airline -->
                             <div class="mb-3" id="airline-field" style="display: none;">
                                 <label for="airline_name" class="form-label">Airline Name</label>
                                 <div class="input-group">
@@ -86,7 +121,9 @@
 <script>
     document.getElementById('role').addEventListener('change', function() {
         const airlineField = document.getElementById('airline-field');
+        const userFields = document.getElementById('user-fields');
         airlineField.style.display = this.checked ? 'block' : 'none';
+        userFields.style.display = !this.checked ? 'block' : 'none';
     });
 </script>
 </body>

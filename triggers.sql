@@ -109,7 +109,12 @@ BEGIN
             'first_class_available', airplane_first - sold_first,
             'total_available', (airplane_economy - sold_economy) + (airplane_business - sold_business) + (airplane_first - sold_first),
             'updated_class', affected_class,
-            'operation', operation_type
+            'operation', operation_type,
+            'seat_number', 
+            CASE 
+                WHEN TG_OP = 'DELETE' THEN OLD.seat_number
+                ELSE NEW.seat_number
+            END
         )::text
     );
 

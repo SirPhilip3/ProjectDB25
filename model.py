@@ -22,7 +22,13 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(150), unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String(255), nullable=False) # La password dovrebbe essere più lunga per l'hash
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), nullable=False)
-
+    
+    # Campi opzionali
+    phone: Mapped[str] = mapped_column(String(255), nullable=True)
+    address: Mapped[str] = mapped_column(String(255), nullable=True)
+    firstname: Mapped[str] = mapped_column(String(255), nullable=True)
+    lastname: Mapped[str] = mapped_column(String(255), nullable=True)
+    
     # Relazione: se l'utente è una compagnia, avrà un profilo airline associato
     airline_profile: Mapped["Airline"] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Relazione: se l'utente è un passeggero, avrà delle prenotazioni

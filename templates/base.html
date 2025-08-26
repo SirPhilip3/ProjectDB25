@@ -83,6 +83,13 @@
                                         <input type="datetime-local" class="form-control" id="departure_date" name="departure_date" value="{{ cached_form.departure_date or '' }}">
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <label for="arrival_date" class="form-label">Max Arrival Date</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+                                        <input type="datetime-local" class="form-control" id="arrival_date" name="arrival_date" value="{{ cached_form.arrival_date or '' }}">
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
                                 <div class="form-check ms-2">

@@ -277,7 +277,30 @@
     socket.on('seat_update', function(data) {
         console.log('Seat update for flight:', data.flight_id, data.data);
         updateSeatAvailability(data.data);
+        updateSeatGraph(data.data);
     });
+
+    function updateSeatGraph(data) {
+        if (data.seat_number && data.operation) {
+            const seatDiv = document.querySelector(`.seat-box[data-seat-code="${data.seat_number}"]`);
+            if (seatDiv) {
+                if (data.operation === "DELETE") {
+                    seatDiv.classList.remove('seat-occupied');
+                    seatDiv.addEventListener('click', seatDiv._seatClickHandler = function() {
+                        document.querySelectorAll('.seat-box').forEach(b => b.classList.remove('seat-selected'));
+                        seatDiv.classList.add('seat-selected');
+                        document.getElementById('seat_number').value = seatDiv.dataset.seatCode;
+                        setBasePrice(seatDiv.dataset.seatClass);
+                        enableBuyButtonIfSeatSelected();
+                    });
+                } else if (data.operation === "INSERT") {
+                    seatDiv.classList.add('seat-occupied');
+                    seatDiv.classList.remove('seat-selected');
+                    seatDiv.removeEventListener('click', seatDiv._seatClickHandler);
+                }
+            }
+        }
+    }
 
     function updateSeatAvailability(data) {
         const economyElement = document.getElementById('economy-seats');

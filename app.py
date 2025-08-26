@@ -80,7 +80,7 @@ def hello_world():
             "to": to_,
             "direct": direct,
             "departure_date": departure_date_str,
-            # "arrival_date": arrival_date,
+            "arrival_date": arrival_date,
             "min_price": min_price,
             "max_price": max_price,
             "sort_by": sort_by
@@ -89,7 +89,7 @@ def hello_world():
 
         search = True
         # funzione per cercare i voli , deve tornare una lista di voli con flight id
-        flights = search_flight(from_, to_, direct, min_price, max_price, sort_by, departure_date)
+        flights = search_flight(from_, to_, direct, min_price, max_price, sort_by, departure_date, arrival_date)
     return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search, cached_form=form_data)
 
 # get information about the user (flights tikets etcc)
@@ -308,14 +308,14 @@ def flight_details(flight_id):
         )
 
         if ticket:
-            socketio.emit(
-                'seat_update',
-                {
-                    'flight_id': str(flight_id),
-                    'occupied_seats': occupied_seats
-                },
-                room=f'flight_{flight_id}'
-            )
+            # socketio.emit(
+            #     'seat_update',
+            #     {
+            #         'flight_id': str(flight_id),
+            #         'occupied_seats': occupied_seats
+            #     },
+            #     room=f'flight_{flight_id}'
+            # )
             flash('Ticket booked successfully!', 'success')
             # se ha successo ritorno alla pagina principale
             # o alla pagina in cui l'utente vede i suoi voli prenotati

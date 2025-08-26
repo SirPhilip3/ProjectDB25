@@ -52,12 +52,16 @@ def register ():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
 
         type = request.form.get('role')
         role = UserRole.AIRLINE if type == 'true' else UserRole.PASSENGER
 
-        # se l'utente è un airline, richiedi anche il nome della compagnia aerea
+        # Se l'utente è un airline richiedi il nome della compagnia aerea, altrimenti nome e cognome
         airline_name = request.form.get('airline_name') if role == UserRole.AIRLINE else None
+        firstname = request.form.get('firstname') if role == UserRole.PASSENGER else None
+        lastname = request.form.get('lastname') if role == UserRole.PASSENGER else None
 
         # Controlla se email è già usata
         if User.query.filter_by(email=email).first():
@@ -70,7 +74,7 @@ def register ():
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
-        new_user = User(email=email, role=role, password=hashed_password)
+        new_user = User(email=email, role=role, password=hashed_password, phone=phone, address=address, firstname=firstname, lastname=lastname)
         try :
             db.session.add(new_user)
             db.session.commit()
