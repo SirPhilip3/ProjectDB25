@@ -1,5 +1,3 @@
-# test socketio per fare l'update in tempo reale dei posti
-
 from database import app
 from flask_socketio import SocketIO, emit, join_room, leave_room
 import psycopg2
@@ -10,6 +8,7 @@ import sys
 from socket_io_init import socketio
 from flask import request
 
+#! Connessione al database da usare docker 
 conn = psycopg2.connect("postgresql://postgres:1234@localhost:5432/Project-DB-test")
 conn.autocommit = True
 
@@ -116,13 +115,4 @@ def check_and_stop_listener(room_name):
 @socketio.on('disconnect')
 def handle_disconnect():
     """Gestisce disconnessione client"""
-    print(f"🔌 Client {request.sid} disconnected")
-
-
-# def stop_all_listeners():
-#     """Ferma tutti i listener attivi"""
-#     with rooms_lock:
-#         for room_name, room_info in active_rooms.items():
-#             room_info['stop_event'].set()
-#         active_rooms.clear()
-#     print("Tutti i listener fermati")
+    print(f"Client {request.sid} disconnected")

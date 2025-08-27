@@ -1,4 +1,4 @@
-# crud operations for the database
+# File per le funzioni
 from database import db
 from model import User , Flight, Airplane, Airline, Ticket
 from sqlalchemy.orm import aliased 
@@ -35,7 +35,7 @@ def decode_sql_errors(e):
     for key, user_msg in error_map.items():
         if key in error_message:
             return user_msg
-    # Default: return a generic message
+    # Default: Restituisce un messaggio di errore generico
     return "An unexpected database error occurred. Please check your input."
 
 # Aggiunge una tratta al database , ritorna il nuovo volo
@@ -123,75 +123,6 @@ def delete_ticket_by_id(ticket_id):
         db.session.rollback()
         print(f"Errore durante l'eliminazione: {e}")
 
-# Ritorna i voli diretti e/o indiretti filtrati con i parametri corrispondenti
-#! da rivedere l'implemetazione
-# def search_flight(departure, arrival, direct_flight, class_type, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now()):
-#     flights = Flight.query.filter(
-#         Flight.departure_airport == departure, 
-#         Flight.destination_airport == arrival,
-#         Flight.departure_time >= departure_date,
-#     ).all()
-#     # Converto i voli diretti in coppiedi voli dove il secondo è None
-#     flights = [(flight, None) for flight in flights]
-
-#     if not direct_flight:
-#         F1 = aliased(Flight)
-#         F2 = aliased(Flight)
-#         flights_aux = db.session.query(F1, F2).filter(
-#             F1.departure_airport == departure,
-#             F1.destination_airport == F2.departure_airport,
-#             F2.destination_airport == arrival,
-#             F1.departure_time >= departure_date,
-#             # devono essere separati da almeno 2 ore , potremmo aggiungere un limite massimo
-#             F2.departure_time >= F1.arrival_time + timedelta(hours=2)).all()
-#         # Aggiungo in coda ai voli diretti i voli con scalo
-#         flights.extend(flights_aux)
-
-#     # aggiunge 2 campi temporanei per il tipo di classe e il prezzo selezionato
-#     for first_flight, second_flight in flights:
-#         first_flight.selected_class = class_type
-#         first_flight.selected_price = getattr(first_flight, f"{class_type}_price")
-#         if second_flight:
-#             second_flight.selected_class = class_type
-#             second_flight.selected_price = getattr(second_flight, f"{class_type}_price")
-    
-#     # Filtri per prezzo
-#     if min_price:
-#         min_price = float(min_price)
-#         price_field = getattr(Flight, f"{class_type}_price")
-#         flights = [(f1, f2) for f1, f2 in flights if (
-#             (f2 is None and f1.selected_price >= min_price) or 
-#             (f2 is not None and (f1.selected_price + f2.selected_price) >= min_price))]
-#     if max_price:
-#         max_price = float(max_price)
-#         price_field = getattr(Flight, f"{class_type}_price")
-#         flights = [(f1, f2) for f1, f2 in flights if (
-#         (f2 is None and f1.selected_price <= max_price) or 
-#         (f2 is not None and (f1.selected_price + f2.selected_price) <= max_price))]
-    
-#     # Ordinamento
-#     if sort_by:
-#         if sort_by == 'price_asc':
-#             price_field = getattr(Flight, f"{class_type}_price")
-#             flights.sort(key=lambda pair: (
-#             pair[0].selected_price if pair[1] is None 
-#             else pair[0].selected_price + pair[1].selected_price))
-#         elif sort_by == 'price_desc':
-#             price_field = getattr(Flight, f"{class_type}_price")
-#             flights.sort(key=lambda pair: (
-#             pair[0].selected_price if pair[1] is None 
-#             else pair[0].selected_price + pair[1].selected_price), reverse=True)
-#         elif sort_by == 'departure_asc':
-#             flights.sort(key=lambda pair: pair[0].departure_time)
-#         elif sort_by == 'departure_desc':
-#             flights.sort(key=lambda pair: pair[0].departure_time,reverse=True)
-#         elif sort_by == 'duration_asc':
-#             flights.sort(key=lambda pair: ((pair[0].arrival_time - pair[0].departure_time).total_seconds()
-#             if pair[1] is None else (pair[1].arrival_time - pair[0].departure_time).total_seconds()))
-
-#     print(flights)
-#     return flights
-
 def search_flight(departure, arrival, direct_flight, min_price=None, max_price=None, sort_by=None, departure_date=datetime.now(), arrival_date=None):
     flights = Flight.query.filter(
         Flight.departure_airport == departure, 
@@ -277,7 +208,7 @@ def search_flight(departure, arrival, direct_flight, min_price=None, max_price=N
     print(flights)
     return flights
 
-#Ritorna un volo specifico con l'id corrispondente
+# Ritorna un volo specifico con l'id corrispondente
 def get_flight_by_id(flight_id):
     try:
         return Flight.query.get(flight_id)
@@ -285,7 +216,7 @@ def get_flight_by_id(flight_id):
         print(f"Error getting flight by id {flight_id}: {e}")
         return None
 
-#Ritorna tutti i voli di una specifica compagnia aerea
+# Ritorna tutti i voli di una specifica compagnia aerea
 def get_flights_by_airline(airline_id): 
     try :
         return Flight.query.filter(Flight.airline_id == airline_id).all()
@@ -306,7 +237,6 @@ def book_ticket(flight_id, passenger_id, seat_number, ticket_class, selected_ext
         elif ticket_class == 'first_class':
             price = selected_flight.first_class_price
             
-        #! price potrebbe essere inutile se abbiamo la classe + gli extra potremmo calcolarla dopo
         if selected_extras :
             for extra in selected_extras :
                 price += extra['price']
@@ -341,7 +271,7 @@ def get_airplanes_by_airline(airline_id):
 
 def get_user_tickets(user_id):
     """
-    ottiene tutti i biglietti di un utente
+    Ottiene tutti i biglietti di un utente
     """
     try:
         tickets = Ticket.query.filter_by(passenger_id = user_id).all()
@@ -381,7 +311,6 @@ def get_airline_statistics(airline_id):
 
     return n_flights, n_airplanes, n_tickets, total_revenue
 
-#! #! da testare
 def get_airline_top_routes(airline_id, limit=10):
     """
     Ottiene le tratte più richieste di una compagnia aerea
@@ -392,7 +321,6 @@ def get_airline_top_routes(airline_id, limit=10):
             Flight.departure_airport,
             Flight.destination_airport,
             func.count(Ticket.id).label('passengers'),
-       
         ).join(
             Ticket, Flight.id == Ticket.flight_id
         ).filter(
@@ -403,7 +331,6 @@ def get_airline_top_routes(airline_id, limit=10):
         ).order_by(
             desc('passengers')
         ).limit(limit).all()
-        
         top_routes = []
         for route in route_stats:
             top_routes.append({
@@ -411,15 +338,12 @@ def get_airline_top_routes(airline_id, limit=10):
                 'passengers': route.passengers,
                
             })
-        
-        return top_routes
-        
+        return top_routes     
     except Exception as e:
         print(f"Error getting top routes: {e}")
         return []
 
 
-#! da testare
 def get_airline_class_distribution(airline_id):
     """
     Ottiene la distribuzione dei passeggeri per classe
@@ -452,7 +376,6 @@ def get_remaining_ticket_count_by_flight(flight_id):
     """
     Ottiene il numero rimanente di biglietti venduti per un volo specifico
     """
-
     try:
         flight_id = str(flight_id)
         airplane = Flight.query.get(flight_id).airplane
@@ -509,69 +432,3 @@ def get_airline_info(airline_id):
     except Exception as e:
         print(f"Error getting airline info {e}")
         return None
-
-#! non usato 
-# def search_airport(name, city, iata_code):
-#     """
-#     Cerca un aeroporto in base al nome, città o codice IATA
-#     """
-#     try:
-#         query = Airport.query.filter_by(
-#             name = name,
-#             city = city,
-#             iata_code = iata_code
-#         ).first()
-#         return query
-#     except Exception as e:
-#         print(f"Error searching airport {e}")
-
-# def search_airport_by_iata(iata_code):
-#     """
-#     Cerca un aeroporto in base al codice IATA
-#     """
-#     try:
-#         query = Airport.query.filter_by(iata_code=iata_code).first()
-#         return query
-#     except Exception as e:
-#         print(f"Error searching airport by IATA {e}")
-
-# def get_airport_by_id(airport_id):
-#     """
-#     Ritorna un aeroporto specifico con l'id corrispondente
-#     """
-#     try:
-#         airports = Airport.query.filter_by(id=airport_id).all()
-#         return airports
-#     except Exception as e:
-#         print(f"Error getting airport by id {e}")
-#         return None
-
-# # Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
-# def add_airport(name, city, iata_code):
-#     """
-#     Aggiunge un aeroporto al database, ritorna il nuovo aeroporto
-#     """
-#     new_airport = Airport(
-#         name=name,
-#         city=city,
-#         iata_code=iata_code
-#     )
-#     try :
-#         db.session.add(new_airport)
-#         db.session.commit()
-#         return new_airport
-#     except Exception as e:
-#         db.session.rollback()  
-#         print(f"Error adding airport {e}")
-#         return None
-
-# def get_all_airports():
-#     """
-#     ottiene tutti gli aeroporti
-#     """
-#     try:
-#         airports = Airport.query.all()
-#         return airports
-#     except Exception as e:
-#          print(f"Error getting airports {e}")
-#          return[]

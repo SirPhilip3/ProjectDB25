@@ -56,7 +56,9 @@ A seconda del ruolo scelto, gli utenti potranno compiere azioni diverse all’in
 
 ## **Login:** 
 
-Gli utenti registrati possono accedere alla loro area riservata effettuando il login tramite l’inserimento delle seguenti credenziali: Email e Password. Dopo aver inserito delle credenziali valide, l’utente sarà autorizzato ad accedere alla sua area personale, dove avrà accesso a delle funzionalità ulteriori specifiche al suo ruolo (“Compagnia aerea” o “Passeggero”) all’interno dell’applicazione. L’autenticazione con le credenziali corrette è essenziale per garantire la privacy e la sicurezza delle informazioni personali di ciascun utente.![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXfBE1xy3Is2fypbF8GZlzQdYYuq_LwLeISymNSVyy04blU2x83iiWxxjyD6E6GdVv6UlXA8xhTzaPqwjtFlg-hdEIk43Mt3iUHta4DbMVZobKo0XiHKvtmZYbf_bbmkNViS3bRKzw?key=fQVTa2iByxLrFWX-c99tXQ)
+Gli utenti registrati possono accedere alla loro area riservata effettuando il login tramite l’inserimento delle seguenti credenziali: Email e Password. Dopo aver inserito delle credenziali valide, l’utente sarà autorizzato ad accedere alla sua area personale, dove avrà accesso a delle funzionalità ulteriori specifiche al suo ruolo (“Compagnia aerea” o “Passeggero”) all’interno dell’applicazione. L’autenticazione con le credenziali corrette è essenziale per garantire la privacy e la sicurezza delle informazioni personali di ciascun utente.
+
+![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXfBE1xy3Is2fypbF8GZlzQdYYuq_LwLeISymNSVyy04blU2x83iiWxxjyD6E6GdVv6UlXA8xhTzaPqwjtFlg-hdEIk43Mt3iUHta4DbMVZobKo0XiHKvtmZYbf_bbmkNViS3bRKzw?key=fQVTa2iByxLrFWX-c99tXQ)
 
 ## **Airline Dashboard** 
 
@@ -69,8 +71,6 @@ Dopo il login l’utente (Airline Company)  entra in un **dashboard completo** 
 5. Analizzare i dati di passeggeri e rotte più richieste 
 
 ![alt text](image-7.png)
-
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7b9vO8dhnlXIRsRm_M4BDcK1P2TTSKvcCTo24EI0XSSdeTAFiHcl_AtHjKglVbHbPXiOsHMwXWrnKDHpFmH8pxWwP-08wNHiSKwyBS9C3qfwv6wHL3BzDe6KFodsuiaicxJMflw?key=fQVTa2iByxLrFWX-c99tXQ)
 
 ## **Schermata di aggiunta di un Aereo**
 
@@ -94,7 +94,7 @@ Dopo il login l’utente (Passeggero) entra in un **dashboard completo** dove pu
 1. Visualizzare i dettagli del proprio profilo
 2. Visualizzare i biglietti prenotati con le relative informazioni e eliminarli. 
 
-![Schermata di gestione biglietti](image.png)
+![alt text](image-11.png)
 
 ## **Schermata di ricerca**
 
@@ -106,17 +106,17 @@ Dopo il login l’utente (Passeggero) entra in un **dashboard completo** dove pu
 
  Esempio volo diretto:
 
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXeflqxPDP-1P_k7tTxKZVOVtN7T9op37y3uubmYcwzu-XC3t1lg33Ntl12A4jLPmZ0TA4Biul70oeh8zOfVvO1QP6zDBh2Fx_rfnHeB3UkDwJcmCJJUYjOGgMfEmH_pu6clXdhQZA?key=fQVTa2iByxLrFWX-c99tXQ)
+![Esempio volo diretto](image-8.png)
 
 Esempio volo con scalo:
 
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXeCKp5i27XLxtLEaBpz2tiFRKp0QsVT_8deSBlxGousqkuzb70eF-BY9Pcou3UwNhCo9x3hpF2owpKktc7GP0awHss3Ig11iJ5hZLaONlBjDupctaOu_sgjnyVyJQwC930irJfiwA?key=fQVTa2iByxLrFWX-c99tXQ)
+![Esempio volo con scalo](image-9.png)
 
 ## **Schermata di prenotazione**
 
 Se si ha eseguito l’accesso come passeggero, si possono prenotare dei biglietti per il volo selezionato che potranno essere visualizzati nella pagina profilo. È possibile selezionare il posto desiderato. Se contemporaneamente un altro utente dovesse comprare un biglietto, il posto risulterà occupato senza dover aggiornare la pagina:
 
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXdO2mQrRPn8K9j3-GtxwAjzbt3z6T44t8gkl638LmIJoyz02v-hlcm0HBeimX2ihEAiUEZj3K2-ZQN6mVL_g6rRxwhYxDCQT1vfe477V2d76Vmt2EQWzKmnlmJcMEybnoIc45eC7g?key=fQVTa2iByxLrFWX-c99tXQ)
+![Schermata di prenotazione](image-10.png)
 
 # **Progettazione**
 
@@ -135,6 +135,9 @@ Se si ha eseguito l’accesso come passeggero, si possono prenotare dei bigliett
 Le query principali sono : 
 
 ```search_flight```
+
+Questa query chiede al database tutti i voli dalla tabella flights che rientrano nei filtri indicati dall'utente. Sono due query distinte, una chiede solo i voli diretti ovvero dove departure_airport e destination_airport sono quelli indicati dall'utente mentre l'altra chiede solo i voli con scalo ovvero  quelli dove departure_airport del primo volo e destination_airport del secondo volo sono quelli indicati dall'utente, con un minimo di due ore di differenza tra arrival_time del primo volo e departure_time del secondo volo.
+
 ```SQL
 -- Voli diretti
 SELECT 
@@ -179,6 +182,9 @@ ORDER BY
 ```
 
 ```get_airline_statistics```
+
+Questa serie di query fornisce le statistiche principali riguardanti una compagnia aerea specifica, come il numero di voli, il numero di aerei, il numero di biglietti venduti e i ricavi totali.
+
 ```SQL
 -- Numero di voli della compagnia
 SELECT COUNT(*) AS n_flights
@@ -204,6 +210,9 @@ WHERE f.airline_id = %(airline_id)s;
 ```
 
 ```get_airline_top_routes```
+
+Questa query restituisce le rotte principali di una compagnia aerea, ovvero quelle con il maggior numero di passeggeri.
+
 ```SQL
 SELECT 
     f.departure_airport,
@@ -224,6 +233,9 @@ LIMIT %(limit)s;
 ```
 
 ```get_airline_class_distribution```
+
+Questa query restituisce il numero di biglietti acquistati per ciascuna classe.
+
 ```SQL
 SELECT 
     t.ticket_class,
@@ -239,8 +251,15 @@ GROUP BY
 ```
 
 ```get_remaining_ticket_count_by_flight```
+
+Queste query ritornano : 
++ Il numero di biglietti venduti per ciascuna classe per un volo specifico
++ Il numero totale di biglietti venduti per il volo
++ Le informazioni sui posti dell'aereo associato al volo
+
+Queste 3 query vengono utilizzate nel codice per ritornare il numero rimanente di biglietti per ogni classe
+
 ```SQL
--- Numero di biglietti venduti per ciascuna classe per un volo specifico
 SELECT
     t.ticket_class,
     COUNT(*) AS sold
@@ -250,14 +269,14 @@ WHERE
     t.flight_id = %(flight_id)s
 GROUP BY
     t.ticket_class;
--- Numero totale di biglietti venduti per il volo
+
 SELECT
     COUNT(*) AS total_sold
 FROM
     tickets t
 WHERE
     t.flight_id = %(flight_id)s;
--- Informazioni sui posti dell'aereo associato al volo
+    
 SELECT
     a.economy_seats,
     a.business_seats,
@@ -276,31 +295,49 @@ WHERE
 I principali vincoli che abbiamo imposto all'interno della base di dati sono :
 
 ```flights.check_arrival_after_departure```
+
+Questo vincolo garantisce che l'orario di arrivo di un volo sia sempre successivo all'orario di partenza.
+
 ```SQL
 check (arrival_time > departure_time)
 ```
 
 ```flights.check_different_airports```
+
+Questo vincolo garantisce che un volo non possa partire e arrivare allo stesso aeroporto.
+
 ```SQL
 check (departure_airport <> destination_airport)
 ```
 
 ```flights.check_non_negative_business_price```
+
+Questo vincolo garantisce che il prezzo del biglietto in classe business non possa essere negativo.
+
 ```SQL
 check (business_price >= 0)
 ```
 
 ```flights.check_non_negative_economy_price```
+
+Questo vincolo garantisce che il prezzo del biglietto in classe economy non possa essere negativo.
+
 ```SQL
 check (economy_price >= 0)
 ```
 
 ```flights.check_non_negative_first_class_price```
+
+Questo vincolo garantisce che il prezzo del biglietto in classe first class non possa essere negativo.
+
 ```SQL
 check (first_class_price >= 0)
 ```
 
 ```airplanes.check_capacity_seats_sum```
+
+Questo vincolo garantisce che la somma dei posti a sedere nelle diverse classi di un aereo non superi la capacità totale dell'aereo.
+
 ```SQL
 check (economy_seats + business_seats + first_class_seats <= capacity)
 ```
@@ -310,6 +347,9 @@ check (economy_seats + business_seats + first_class_seats <= capacity)
 I principali trigger che abbiamo sviluppato sono i seguenti : 
 
 ```trigger_overlap```
+
+Questo trigger impedisce la sovrapposizione di voli per lo stesso aereo facendo in modo che all'inserimento di un nuovo volo, non esistano altri voli con lo stesso aereo che abbiano orari di partenza e arrivo sovrapposti.
+
 ```SQL
 create function prevent_airplane_overlap() returns trigger
     language plpgsql
@@ -337,6 +377,9 @@ execute procedure prevent_airplane_overlap();
 ```
 
 ```trigger_check_seat_availability```
+
+Controlla che il numero di biglietti venduti per una certa classe non superi il numero di posti disponibili per quella classe nell'aereo associato al volo. Se si tenta di inserire un biglietto quando non ci sono più posti disponibili, viene sollevata un'eccezione.
+
 ```SQL
 create function check_seat_availability() returns trigger
     language plpgsql
@@ -380,6 +423,9 @@ execute procedure check_seat_availability();
 ```
 
 ```trigger_notify_seat_availability``` ( utilizzato per la visualizzazione in tempo reale dei posti )
+
+Ogni volta che viene inserito, aggiornato o eliminato un biglietto, questo trigger invia una notifica con la disponibilità dei posti per il volo associato e il posto che ha subito il cambiamento.
+
 ```SQL
 create function notify_seat_availability() returns trigger
     language plpgsql

@@ -21,7 +21,6 @@ def login ():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        #? first da riguardare
         user = User.query.filter_by(email=email).first()
         
         if user and check_password_hash(user.password, password):
@@ -30,23 +29,15 @@ def login ():
             if user.role == UserRole.AIRLINE:
                 return redirect(url_for('airline_profile', airline_id=user.id))
             elif user.role == UserRole.PASSENGER:
-                #! Fix qunado cerci un volo e non sei loggato crasha
-                #! se sei airline non dovresti poter cliccare select flight
-                #? redirect to user profile or base (dove ci sono i voli)
                 next_page = request.args.get('next')
                 if next_page:
                     return redirect(next_page)
-                # url = request.referrer
-                # if 'flight' in url: # se arriva richiest da flight_details dopo aver fatto login ritorna alla pagina del volo che si stava visualizzando
-                #     # idealmente dovrebbe rimanere nello stato in cui si trovava prima del login
-                #     return redirect(url_for('flight_details', flight_id=request.args.get('flight')))
-                return redirect(url_for('hello_world')) # ritorna alla lista dei voli (potremmo far tornare a pagina specifica dello user)
+                return redirect(url_for('hello_world')) # ritorna alla lista dei voli 
         else:
             flash('Invalid username or password', 'danger')
             return redirect(url_for('login'))
     return render_template("/auth/login.html")
 
-# diverisfy for role
 @app.route("/register" , methods=['GET', 'POST'])
 def register ():
     if request.method == 'POST':

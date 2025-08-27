@@ -4,7 +4,6 @@ from model import UserRole, User , Flight, Airplane, Airline, Ticket
 from datetime import datetime
 from werkzeug.security import generate_password_hash
 
-
 with app.app_context():
     # Cancella dati precedenti
     db.drop_all()

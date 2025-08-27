@@ -7,7 +7,7 @@ from crud import *
 from model import UserRole
 from datetime import datetime, date
 
-from socket_test import *
+from socket_ import *
 from socket_io_init import socketio
 
 with app.app_context():
@@ -24,42 +24,24 @@ def page_not_found(error):
 @app.route("/", methods=['GET', 'POST'])
 def hello_world():
     flights = []
-    #! potremmo fare che l'utente non deve selezionare direct o non e facciamo vedere i due risultati assieme
     direct = False # False di default
-    # se l'utente ha cliccato search in base.html
 
     search = False # Variabile per non mostrare "No flights available for the selected route." al primo caricamento della pagina
 
     form_data = {}
 
     if request.method == 'POST':
-        #! ricerca aereoporti non usata
-        # departure_airport_name = request.form['name_from']
-        # departure_airport_city = request.form['city_from']
-        # departure_airport_iata = request.form['iata_from']
-
-        # arrival_airport_name = request.form['name_to']
-        # arrival_airport_city = request.form['city_to']
-        # arrival_airport_iata = request.form['iata_to']
-
-        # departure_airport = search_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
-        # arrival_airport = search_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
-        # 
-        # if not departure_airport or not arrival_airport:
-        #     print("One or both airports not found, please check the input.")
-        #     redirect(url_for('hello_world'))
         if 'reset' in request.form:
             # Reset: nessun filtro, nessun volo, nessun search
             return render_template("base.html", flights=[], user=current_user, direct_flight=False, search=False, cached_form={})
         
         from_ = request.form.get('start_airport') 
         to_ = request.form.get('end_airport') 
-        #! non dovrebbe più servirci
+
         direct = request.form.get('direct_flight') == 'on' # True or False
 
         class_type = request.form.get('flight_class') # Economy, Business, First Class 
-
-        # departure_date = datetime.fromisoformat(request.form.get('departure_date'))
+        
         departure_date_str = request.form.get('departure_date')
         if departure_date_str:
             departure_date = datetime.fromisoformat(departure_date_str)
@@ -68,7 +50,7 @@ def hello_world():
             departure_date_str = departure_date.isoformat(timespec='minutes')  # formato compatibile con input type="datetime-local"
 
 
-        #! per far specificare all'utente l'orario massimo di arrivo
+        # per far specificare all'utente l'orario massimo di arrivo
         arrival_date = request.form.get('arrival_date')
 
         min_price = request.form.get('min_price')
@@ -88,30 +70,27 @@ def hello_world():
         print(form_data)
 
         search = True
-        # funzione per cercare i voli , deve tornare una lista di voli con flight id
+        # funzione per cercare i voli
         flights = search_flight(from_, to_, direct, min_price, max_price, sort_by, departure_date, arrival_date)
     return render_template("base.html", flights=flights, user=current_user, direct_flight=direct, search=search, cached_form=form_data)
 
-# get information about the user (flights tikets etcc)
-#! maybe inutile
+# Recuper le informazioni dell'utente (flights tikets etc.)
 @app.route("/user")
 @login_required
 def user():
     if current_user.role == UserRole.PASSENGER:
         tickets = get_user_tickets(current_user.id)
-        # remove cache
+        # Elimina la cache
         response = make_response(render_template('dashboard_user.html', user=current_user, tickets=tickets))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         return response
     else:
         return render_template('unauthorized.html')
 
-# information about the airline
-#! protrei entrare quando faccio back 
+# informazioni riguardanti la compagnia aerea
 @app.route("/airline/<uuid:airline_id>")
 @login_required
 def airline_profile(airline_id):
-    #! maybe fare una funzione a parte per questo check
     if current_user.role == UserRole.AIRLINE:
         # mostra il profilo della compagnia aerea
         airline_info = get_airline_info(current_user.airline_profile.id)
@@ -124,9 +103,6 @@ def airline_profile(airline_id):
         top_routes = get_airline_top_routes(current_user.airline_profile.id)
         class_distribution = get_airline_class_distribution(current_user.airline_profile.id)
 
-        # Per risolvere il fatto che cliccando indietro posso tornare su una pagina che necessita di login 
-        # quando clicca indietro il broswer non fa una nuova richiesta ma mostra la pagina cache
-        # aggiunge headers per disabilitare la cache
         response = make_response(render_template('airline_profile.html', airline_info=airline_info, flights=flights, airplanes=airplanes, class_distribution=class_distribution, top_routes=top_routes, n_flights=n_flights, n_airplanes=n_airplanes, n_tickets=n_tickets, tot_revenue=tot_revenue))
         response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         
@@ -152,7 +128,7 @@ def delete_airplane():
         delete_airplane_by_id(airplane_id)
         return redirect(url_for('airline_profile', airline_id=current_user.airline_profile.id))
 
-# Per eliminare un aereo come compagnia aerea
+# Per eliminare un ticket come passeggero
 @app.route("/delete_ticket", methods=['POST'])
 @login_required
 def delete_ticket():
@@ -168,24 +144,6 @@ def add_flight_page():
     if current_user.role == UserRole.AIRLINE:
 
         if request.method == 'POST':
-            #! se volessimo usare la tabella ereoporti
-            # departure_airport_name = request.form['name_from']
-            # departure_airport_city = request.form['city_from']
-            # departure_airport_iata = request.form['iata_from']
-
-            # arrival_airport_name = request.form['name_to']
-            # arrival_airport_city = request.form['city_to']
-            # arrival_airport_iata = request.form['iata_to']
-        
-            # departure_airport = search_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
-            # if not departure_airport :
-            #     print("Departure airport not found, adding it.")
-            #     departure_airport=add_airport(departure_airport_name, departure_airport_city, departure_airport_iata)
-            
-            # arrival_airport = search_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
-            # if not arrival_airport :
-            #     print("Departure airport not found, adding it.")
-            #     arrival_airport=add_airport(arrival_airport_name, arrival_airport_city, arrival_airport_iata)
             departure_airport = request.form['from']
             arrival_airport = request.form['to']
             
@@ -216,23 +174,8 @@ def add_flight_page():
                     flash("Flight added successfully.", "success")
             except Exception as e:
                 flash(f"Error: {e}", "danger")
-            
-            # if new_flight:
-            #     flash("Flight added successfully.", "success")
-            # else:
-            #     flash("Error: flight could not be added.", "danger")
 
         airplanes = get_airplanes_by_airline(current_user.airline_profile.id)
-        
-        # ! test falshes
-        # flash("This is a primary message", "primary")
-        # flash("This is a secondary message", "secondary")
-        # flash("This is a success message", "success")
-        # flash("This is a danger message", "danger")
-        # flash("This is a warning message", "warning")
-        # flash("This is an info message", "info")
-        # flash("This is a light message", "light")
-        # flash("This is a dark message", "dark")
 
         return render_template('add_flight.html', airplanes=airplanes)
     else:
@@ -249,7 +192,7 @@ def add_airplane_page():
             seats_economy = int(request.form['seats_economy'])
             seats_business = int(request.form['seats_business'])
             seats_first = int(request.form['seats_first'])
-            # se è airline ha airline_profile e il suo id , altrimenti current_user.id è l'id dell'utente (cose diverse)
+            # se è airline ha airline_profile e il suo id , altrimenti current_user.id è l'id dell'utente 
             add_airplane(model, capacity, seats_economy, seats_business, seats_first, current_user.airline_profile.id)
         return render_template('add_airplane.html')
     else:
@@ -259,7 +202,7 @@ def add_airplane_page():
 @app.route("/flight/<uuid:flight_id>", methods=['GET', 'POST'])
 @login_required
 def flight_details(flight_id):
-    # deve fare una query per prendere i dettagli del volo
+    # query per prendere i dettagli del volo
     flight_details = get_flight_by_id(str(flight_id))
     message = None
 
@@ -268,9 +211,7 @@ def flight_details(flight_id):
         return redirect(url_for('hello_world'))
 
     available_tickets = get_remaining_ticket_count_by_flight(flight_id)
-    # print(f"Available tickets: {available_tickets}")
     occupied_seats = get_occupied_seats(flight_id)
-    # occupied_seats = []
     if request.method == 'POST':
         flight_id = request.form.get('flight_id')
         seat_number = request.form.get('seat_number')
@@ -308,21 +249,9 @@ def flight_details(flight_id):
         )
 
         if ticket:
-            # socketio.emit(
-            #     'seat_update',
-            #     {
-            #         'flight_id': str(flight_id),
-            #         'occupied_seats': occupied_seats
-            #     },
-            #     room=f'flight_{flight_id}'
-            # )
             flash('Ticket booked successfully!', 'success')
-            # se ha successo ritorno alla pagina principale
-            # o alla pagina in cui l'utente vede i suoi voli prenotati
-            # per ora torno alla pagina principale
             return redirect(url_for('hello_world'))
         else:
-            # db.session.rollback()
             print(f'Booking failed: {message}')
             return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, available_tickets=available_tickets, seat_status=occupied_seats)
 
@@ -330,5 +259,4 @@ def flight_details(flight_id):
 
 
 if __name__ == '__main__':
-    # Use socketio.run() instead of app.run() to enable Socket.IO
     socketio.run(app, debug=True, host='0.0.0.0', port=5000)
