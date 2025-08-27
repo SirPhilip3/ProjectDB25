@@ -68,11 +68,15 @@ Dopo il login l’utente (Airline Company)  entra in un **dashboard completo** 
 4. Gestire aerei (aggiungere/eliminare)
 5. Analizzare i dati di passeggeri e rotte più richieste 
 
+![alt text](image-7.png)
+
 ![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXd7b9vO8dhnlXIRsRm_M4BDcK1P2TTSKvcCTo24EI0XSSdeTAFiHcl_AtHjKglVbHbPXiOsHMwXWrnKDHpFmH8pxWwP-08wNHiSKwyBS9C3qfwv6wHL3BzDe6KFodsuiaicxJMflw?key=fQVTa2iByxLrFWX-c99tXQ)
 
 ## **Schermata di aggiunta di un Aereo**
 
 Un Operatore può aggiungere un nuovo aereo alla propria flotta indicandone il modello e la sua capacità.
+
+![Schermata di aggiunta aereo](image-2.png)
 
 ## **Schermata di aggiunta di un volo**
 
@@ -142,7 +146,7 @@ WHERE
    f1.departure_airport = %(departure)s
    AND f1.destination_airport = %(arrival)s
    AND f1.departure_time >= %(departure_date)s
-   {AND f1.arrival_time <= %(arrival_date)s}
+   {AND f1.arrival_time <= %(arrival_date)s} -- opzionale
    AND (
       f1.economy_price BETWEEN %(min_price)s AND %(max_price)s OR
       f1.business_price BETWEEN %(min_price)s AND %(max_price)s OR

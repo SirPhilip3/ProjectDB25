@@ -2,16 +2,18 @@ from app import app
 from database import db
 from model import UserRole, User , Flight, Airplane, Airline, Ticket
 from datetime import datetime
+from werkzeug.security import generate_password_hash
+
 
 with app.app_context():
     # Cancella dati precedenti
     db.drop_all()
     db.create_all()
-
+    
     # ====== CREAZIONE UTENTI ======
     passenger1 = User(
         email="mario.rossi@gmail.com",
-        password="password123",
+        password=generate_password_hash("password123", method='pbkdf2:sha256'),
         role=UserRole.PASSENGER,
         firstname="Mario",
         lastname="Rossi",
@@ -20,7 +22,7 @@ with app.app_context():
     )
     passenger2 = User(
         email="luigi.verdi@gmail.com",
-        password="pass123word",
+        password=generate_password_hash("pass123word", method='pbkdf2:sha256'),
         role=UserRole.PASSENGER,
         firstname="Luigi",
         lastname="Verdi",
@@ -29,7 +31,7 @@ with app.app_context():
     )
     passenger3 = User(
         email="lucia.Bianchi@gmail.com",
-        password="123password",
+        password=generate_password_hash("123password", method='pbkdf2:sha256'),
         role=UserRole.PASSENGER,
         firstname="Lucia",
         lastname="Bianchi",
@@ -42,19 +44,21 @@ with app.app_context():
 
     airline_user1 = User(
         email="airitaly@gmail.com",
-        password="securepass",
+        password=generate_password_hash("securepass", method='pbkdf2:sha256'),
         role=UserRole.AIRLINE,
         phone="+39 0022765657",
         address="Viale Europa 22, Roma"
     )
     airline_user2 = User(
         email="flysafe@gmail.com",
-        password="pass0044",
+        password=generate_password_hash("pass0044", method='pbkdf2:sha256'),
         role=UserRole.AIRLINE,
         phone="+39 34658633",
         address="Via Cavour 33, Treviso"
     )
 
+    db.session.add_all([airline_user1, airline_user2])
+    db.session.commit()
 
     # ====== CREAZIONE COMPAGNIE AEREE ======
     airline1 = Airline(
@@ -66,6 +70,8 @@ with app.app_context():
         user=airline_user2
     )
 
+    db.session.add_all([airline1, airline2])
+    db.session.commit()
     # ====== CREAZIONE AEREI COLLEGATI ALLE COMPAGNIE ======
     # Compagnia 1
     airplane1 = Airplane(
@@ -94,13 +100,16 @@ with app.app_context():
         airline=airline2
     )
 
+    db.session.add_all([airplane1, airplane2, airplane3])
+    db.session.commit()
+
     # ====== CREAZIONE VOLI ======
     # Compagnia 1 Aereo 1
     flight1 = Flight(
                 departure_time=datetime(2025, 10, 1, 10, 30),
                 arrival_time=datetime(2025, 10, 1, 14, 10),
-                departure_airport="Roma Fiumicino (FCO)",
-                destination_airport="Parigi CDG (CDG)",
+                departure_airport="Roma",
+                destination_airport="Parigi",
                 economy_price=80.0,
                 business_price=250.0,
                 first_class_price=300.0,
@@ -113,10 +122,10 @@ with app.app_context():
             )
     # Compagnia 1 Aereo 2
     flight2 = Flight(
-                departure_time=datetime(2025, 9, 10, 9, 30),
-                arrival_time=datetime(2025, 9, 10, 10, 50),
-                departure_airport="Milano Malpensa (MXP)",
-                destination_airport="Londra Heathrow (LHR)",
+                departure_time=datetime(2025, 11, 10, 9, 30),
+                arrival_time=datetime(2025, 11, 10, 10, 50),
+                departure_airport="Milano",
+                destination_airport="Londra",
                 economy_price=45.0,
                 business_price=70.0,
                 first_class_price=100.0,
@@ -129,10 +138,10 @@ with app.app_context():
             )
     # Compagnia 2 Aereo 1
     flight3 = Flight(
-                departure_time=datetime(2025, 9, 28, 18, 0),
-                arrival_time=datetime(2025, 9, 29, 3, 40),
-                departure_airport="Parigi Charles de Gaulle (CDG)",
-                destination_airport="Tokyo Narita (NRT)",
+                departure_time=datetime(2025, 10, 15, 18, 0),
+                arrival_time=datetime(2025, 10, 16, 3, 40),
+                departure_airport="Parigi",
+                destination_airport="Tokyo",
                 economy_price=180.0,
                 business_price=300.0,
                 first_class_price=400.0,
@@ -145,6 +154,8 @@ with app.app_context():
                 ]
             )
 
+    db.session.add_all([flight1, flight2, flight3])
+    db.session.commit()
     # ====== CREAZIONE TICKETS ======
     # Passenger 1 Flight 1
     ticket1 = Ticket(
@@ -226,14 +237,6 @@ with app.app_context():
             flight_id=flight3.id
         )
   
-    db.session.add_all([airline_user1, airline_user2])
-    db.session.commit()
-    db.session.add_all([airline1, airline2])
-    db.session.commit()
-    db.session.add_all([airplane1, airplane2, airplane3])
-    db.session.commit()
-    db.session.add_all([flight1, flight2, flight3])
-    db.session.commit()
     db.session.add_all([ticket1, ticket2, ticket3, ticket4, ticket5, ticket6, ticket7, ticket8, ticket9])
     db.session.commit()
 
