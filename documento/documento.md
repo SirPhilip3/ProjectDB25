@@ -18,7 +18,7 @@ La presente relazione ha l’obiettivo di descrivere il progetto realizzato dal 
 
 - Dettagli implementativi relativi alla realizzazione del backend e del frontend
 
-- Ruolo di ciascun componente del gruppo nella realizzazione del prodotto finale****
+- Ruolo di ciascun componente del gruppo nella realizzazione del prodotto finale
 
 # **Funzionalità principali**
 
@@ -124,11 +124,14 @@ Se si ha eseguito l’accesso come passeggero, si possono prenotare dei bigliett
 
 **Modello a oggetti:** Dall’analisi dei requisiti del progetto è emersa la seguente rappresentazione a oggetti del sistema da implementare:
 
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXcelOswG62HRQKwMiqO9--XgSwj4lAE12GRjBYveLYuVSWYlwxpQFu0fjWbw7YOVAXPj3RAFGLDQN5hWqN7cabLA-txSKL55frsrCb5m1WzLOOl1lglajp11-d3zzSRiUYnclpR?key=fQVTa2iByxLrFWX-c99tXQ)
+![schema relazionale](Untitled-2025-08-28-1530.png)
 
 **Modello relazionale:** La conversione nel modello relazionale produce il seguente diagramma:
 
-![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXfVwkkCrCh-HX0l44I6366C8QlyYFmYPQ7ePqQr6h0xoU8Cin69_oA-aZ8UDnGMo7eTbsJ6onT0U4UQ4z8mzBa-KGJSjcbuVSeakjVuCKetzYzwxR4SbDvxumz9Ebd5icVOTohhrw?key=fQVTa2iByxLrFWX-c99tXQ)
+<!-- ![schema oggetti](withour_airplane_id_on_flights.png) -->
+![schema oggetti](dbv3.png)
+
+Nello schema ad oggetti abbiamo aggiunto  nella tabella Flight l'attributo "airline_id" per collegare ogni volo alla compagnia aerea specifica ( questo possiamo farlo poichè all0inserimento di un nuovo volo sappiamo quale compagnia erea sta eseguendo l'operazione ) , in questo modo le query risultano notevolmente semplificate.
 
 ### **Query utilizzate**
 
@@ -188,7 +191,7 @@ Questa serie di query fornisce le statistiche principali riguardanti una compagn
 ```SQL
 -- Numero di voli della compagnia
 SELECT COUNT(*) AS n_flights
-FROM flights
+FROM flights 
 WHERE airline_id = %(airline_id)s;
 
 -- Numero di aerei della compagnia
@@ -340,6 +343,59 @@ Questo vincolo garantisce che la somma dei posti a sedere nelle diverse classi d
 
 ```SQL
 check (economy_seats + business_seats + first_class_seats <= capacity)
+```
+
+```airplanes.check_non_negative_economy_seats```
+
+Questo vincolo garantisce che il numero di posti a sedere in classe economy non possa essere negativo.
+
+```SQL
+check (economy_seats >= 0)
+```
+
+```airplanes.check_non_negative_business_seats```
+
+Questo vincolo garantisce che il numero di posti a sedere in classe business non possa essere negativo.
+
+```SQL
+check (business_seats >= 0)
+```
+```airplanes.check_non_negative_first_class_seats```
+
+Questo vincolo garantisce che il numero di posti a sedere in classe first class non possa essere negativo.
+
+```SQL
+check (first_class_seats >= 0)
+```
+
+```airplanes.check_positive_capacity```
+
+Questo vincolo garantisce che la capacità totale di un aereo sia sempre positiva.
+
+```SQL
+check (capacity > 0)
+```
+
+```tickets.unique_seat_per_flight```
+
+Questo vincolo garantisce che ogni posto a sedere in un volo sia unico.
+
+```SQL
+UNIQUE (seat_number, flight_id)
+```
+```tickets.check_valid_ticket_class```
+
+Questo vincolo garantisce che la classe del biglietto sia in un formato valido
+
+```SQL
+check (ticket_class IN ('economy', 'business', 'first'))
+```
+```tickets.check_non_negative_ticket_price```
+
+Questo vincolo garantisce che il prezzo totale del biglietto non possa essere negativo.
+
+```SQL
+check (price >= 0)
 ```
 
 ### **Trigger**
@@ -502,6 +558,10 @@ create trigger trigger_notify_seat_availability
 execute procedure notify_seat_availability();
 ```
 
+### **Indici**
+
+Abbiamo deciso di inserire un indice in ```Flights``` sulla colonna ```departure_time``` per velocizzare le query che filtrano i voli in base all'orario di partenza visto che questo filtro viene sempre effettuato nella ricerca di un volo.
+
 ## **Scelte progettuali principali**
 
 **Backend:** Per la progettazione del backend abbiamo utilizzato Python con le librerie :
@@ -535,4 +595,5 @@ Il frontend si connette a questa room utilizzando il flight_id per ricevere aggi
 
 # **Contributo al progetto**
 
-- La cosa a l’ha fatto b
+- 897314
+  - Implementazione del backend

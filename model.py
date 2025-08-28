@@ -59,11 +59,15 @@ class Airplane(db.Model):
     business_seats: Mapped[int] = mapped_column(Integer, nullable=False)
     first_class_seats: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    # Controlla che capacity <= somma di tutti i posti
     __table_args__ = (
+        # Controlla che capacity <= somma di tutti i posti
         CheckConstraint(
             'capacity <= economy_seats + business_seats + first_class_seats', name='check_capacity_seats_sum'
         ),
+        CheckConstraint('capacity > 0', name='check_positive_capacity'),
+        CheckConstraint('economy_seats >= 0', name='check_non_negative_economy_seats'),
+        CheckConstraint('business_seats >= 0', name='check_non_negative_business_seats'),
+        CheckConstraint('first_class_seats >= 0', name='check_non_negative_first_class_seats'),
     )
     
     airline_id: Mapped[str] = mapped_column(ForeignKey('airlines.id'), nullable=False)
@@ -107,7 +111,7 @@ class Flight(db.Model):
         CheckConstraint('economy_price >= 0', name='check_non_negative_economy_price'),
         CheckConstraint('business_price >= 0', name='check_non_negative_business_price'),
         CheckConstraint('first_class_price >= 0', name='check_non_negative_first_class_price'),
-        Index('idx_flight_airline_time', 'airline_id', 'departure_time'),
+        Index('idx_flight_departure_time', 'departure_time'),
     )
 
     def __repr__(self):
@@ -130,6 +134,8 @@ class Ticket(db.Model):
     
     __table_args__ = (
         UniqueConstraint('seat_number', 'flight_id', name='unique_seat_per_flight'),
+        CheckConstraint("ticket_class IN ('economy', 'business', 'first')", name='check_valid_ticket_class'),
+        CheckConstraint('price >= 0', name='check_non_negative_ticket_price'),
     )
 
     def __repr__(self):
