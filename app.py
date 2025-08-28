@@ -258,5 +258,20 @@ def flight_details(flight_id):
     return render_template('flight_details.html', flight_id=flight_id ,flight=flight_details, available_tickets=available_tickets, seat_status=occupied_seats)
 
 
+def check_db_connection():
+    try:
+        with app.app_context():
+            db.session.execute(text('SELECT 1'))
+        return True
+    except Exception as e:
+        print(f"Database connection error: {e}")
+        return False
+
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+    while not check_db_connection():
+        print("cecking connection")
+        time.sleep(1)
+    
+    from populate import populate_db_with_demo_data
+    populate_db_with_demo_data()
+    socketio.run(app, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)

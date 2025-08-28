@@ -20,6 +20,26 @@ La presente relazione ha l’obiettivo di descrivere il progetto realizzato dal 
 
 - Ruolo di ciascun componente del gruppo nella realizzazione del prodotto finale
 
+## **Installazione**
+
+Per installare l'applicazione semplicemente spostarsi all'interno della cartella dove si trova il codice sorgente e runnare il seguente comando ( è necessario avere Docker e Docker Compose installati ) :
+
+```
+docker compose up --build
+```
+
+Successivamente connettersi al seguente indirizzo web : http://localhost:5000
+
+Queste sono degli account di esempio per il login:
+
+| **Ruolo**      | **Email**                | **Password**    |
+|----------------|--------------------------|-----------------|
+| Passeggero     | mario.rossi@gmail.com    | password123     |
+| Passeggero     | luigi.verdi@gmail.com    | pass123word     |
+| Passeggero     | lucia.Bianchi@gmail.com  | 123password     |
+| Compagnia      | airitaly@gmail.com       | securepass      |
+| Compagnia      | flysafe@gmail.com        | pass0044        |
+
 # **Funzionalità principali**
 
 ## **Navbar con logo e tasti login e register**:
@@ -131,7 +151,7 @@ Se si ha eseguito l’accesso come passeggero, si possono prenotare dei bigliett
 <!-- ![schema oggetti](withour_airplane_id_on_flights.png) -->
 ![schema oggetti](dbv3.png)
 
-Nello schema ad oggetti abbiamo aggiunto  nella tabella Flight l'attributo "airline_id" per collegare ogni volo alla compagnia aerea specifica ( questo possiamo farlo poichè all0inserimento di un nuovo volo sappiamo quale compagnia erea sta eseguendo l'operazione ) , in questo modo le query risultano notevolmente semplificate.
+Nello schema ad oggetti abbiamo aggiunto  nella tabella Flight l'attributo "airline_id" per collegare ogni volo alla compagnia aerea specifica ( questo possiamo farlo poichè all'inserimento di un nuovo volo sappiamo quale compagnia aerea sta eseguendo l'operazione ) , in questo modo le query risultano notevolmente semplificate.
 
 ### **Query utilizzate**
 
@@ -594,6 +614,19 @@ Il frontend si connette a questa room utilizzando il flight_id per ricevere aggi
 
 
 # **Contributo al progetto**
+La realizzazione del progetto è avvenuta in maniera unitaria lavorando in gruppo, anche grazie alla funzionalità "Live Share" di visual studio code.
 
-- 897314
+- 897314 (Filippo Gumiero)
+  - Gestione del database
   - Implementazione del backend
+  - Implementazione del frontend
+  - Stesura del documento
+- 886732 (Surian Raoul)
+  - Realizzazione del video
+  - Implementazione del frontend
+  - Implementazione del backend
+  - Stesura del documento
+- 876452 (Hysenaj Diolen)
+  - Implementazione del frontend
+  - Implementazione del backend
+  - Stesura del documento
