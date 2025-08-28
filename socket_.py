@@ -13,17 +13,16 @@ from flask import request
 # conn = psycopg2.connect("postgresql://postgres:1234@db:5432/Project-DB-test")
 # conn.autocommit = True
 
-def get_db_connection(retries=10, delay=1):
-    for i in range(retries):
+def get_db_connection(delay=1):
+    while True:
         try:
             # connessione docker
             conn = psycopg2.connect("postgresql://postgres:1234@db:5432/Project-DB-test")
             conn.autocommit = True
             return conn
         except psycopg2.OperationalError as e:
-            print(f"Postgres not ready, retrying in {delay}s... ({i+1}/{retries})")
+            print(f"Postgres not ready, retrying in {delay}s...")
             time.sleep(delay)
-    raise Exception("Could not connect to Postgres after several retries.")
 
 conn = get_db_connection()
 
