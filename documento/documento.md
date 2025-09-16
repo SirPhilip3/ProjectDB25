@@ -3,38 +3,30 @@
 **Gruppo composto da:**
 
 - Gumiero Filippo - 897314
-
 - Surian Raoul - 886732
-
 - Hysenaj Diolen - 876452
-
 # **Introduzione**
 
 La presente relazione ha l’obiettivo di descrivere il progetto realizzato dal nostro gruppo per il corso di Basi di dati. Il documento è strutturato nel seguente modo: 
 
 - Descrizione ad alto livello delle funzionalità supportate dalla web application
-
 - Descrizione delle scelte relative alla progettazione del database, supportate da opportune rappresentazioni grafiche
-
 - Dettagli implementativi relativi alla realizzazione del backend e del frontend
-
-- Ruolo di ciascun componente del gruppo nella realizzazione del prodotto finale
-
+- Ruolo di ciascun componente del gruppo nella realizzazione del progetto
 ## **Installazione**
 
-Per installare l'applicazione semplicemente spostarsi all'interno della cartella dove si trova il codice sorgente e runnare il seguente comando ( è necessario avere Docker e Docker Compose installati ) :
+Per installare l'applicazione semplicemente spostarsi all'interno della cartella dove si trova il codice sorgente e eseguire il seguente comando ( è necessario avere Docker e Docker Compose installati ) :
 
 ```
 docker compose up --build
 ```
 
 Successivamente connettersi al seguente indirizzo web : http://localhost:5000
-
-Queste sono degli account di esempio per il login:
+All'interno dell'appicazione sarà possibile trovare dei dati demo , possiamo collegarci a vari account pre esitstenti con le seguenti credenziali :
 
 | **Ruolo**      | **Email**                | **Password**    |
 |----------------|--------------------------|-----------------|
-| Passeggero     | mario.rossi@gmail.com    | password123     |
+| Passeggero     | mario.rossi@gmail.com     | password123     |
 | Passeggero     | luigi.verdi@gmail.com    | pass123word     |
 | Passeggero     | lucia.Bianchi@gmail.com  | 123password     |
 | Compagnia      | airitaly@gmail.com       | securepass      |
@@ -59,35 +51,31 @@ I tasti login e register indirizzano alle relative pagine:
 Nella pagina ”Register”, gli utenti possono completare il processo di registrazione fornendo delle informazioni obbligatorie:
 
 + Email, Password
-
 + Checkbox per specificare se ci si vuole registrare come compagnia aerea o come un normale utente. In caso affermativo, viene richiesto il nome della compagnia aerea.
 
  Inoltre vengono richieste delle informazioni facoltative:
 
 + Numero di telefono, indirizzo e nel caso non si selezioni il checkbox anche nome e cognome del passeggero
-
 ## **Ruoli**:
 
 A seconda del ruolo scelto, gli utenti potranno compiere azioni diverse all’interno della piattaforma.
 
-+ **Compagnie aeree:**  Le compagnie possono aggiungere o rimuovere aerei a loro disposizione, aggiungere o rimuovere delle tratte servite dai propri aerei e visualizzare le statistiche riguardanti il numero di aerei, il numero di tratte disponibili, il numero di biglietti venduti, il guadagno totale, le tratte maggiormente richieste e la distribuzione dei biglietti venduti divisa per classi(economy, business e first class).
++ **Compagnie aeree:**  Le compagnie possono aggiungere o rimuovere aerei a loro disposizione, aggiungere o rimuovere dei voli serviti dai propri aerei e visualizzare le statistiche riguardanti il numero di aerei, il numero di tratte disponibili, il numero di biglietti venduti, il guadagno totale, le tratte maggiormente richieste e la distribuzione dei biglietti venduti divisa per classi (economy, business e first class).
 
-+ **Passeggeri:** I passeggeri possono comprare biglietti aerei. L’applicazione permette l’ordinamento delle alternative possibili in base a vari parametri (costo, durata, numero di soste, etc.). Una volta selezionata un’alternativa, i passeggeri possono procedere all’acquisto dei biglietti in una pagina apposita.
-
++ **Passeggeri:** I passeggeri possono comprare biglietti aerei. L’applicazione permette l’ordinamento delle alternative possibili in base a vari parametri (costo, ora e data di partenza e ora e data massima di arrivo, voli diretti, etc.). Una volta selezionata un’alternativa, i passeggeri possono procedere all’acquisto dei biglietti in una pagina apposita.
 ## **Login:** 
 
-Gli utenti registrati possono accedere alla loro area riservata effettuando il login tramite l’inserimento delle seguenti credenziali: Email e Password. Dopo aver inserito delle credenziali valide, l’utente sarà autorizzato ad accedere alla sua area personale, dove avrà accesso a delle funzionalità ulteriori specifiche al suo ruolo (“Compagnia aerea” o “Passeggero”) all’interno dell’applicazione. L’autenticazione con le credenziali corrette è essenziale per garantire la privacy e la sicurezza delle informazioni personali di ciascun utente.
+Gli utenti registrati possono accedere alla loro area riservata effettuando il login tramite l’inserimento delle seguenti credenziali: Email e Password. Dopo aver inserito delle credenziali valide, l’utente sarà autorizzato ad accedere alla sua area personale, dove avrà accesso a delle funzionalità ulteriori specifiche al suo ruolo (“Compagnia aerea” o “Passeggero”) all’interno dell’applicazione.
 
 ![](https://lh7-rt.googleusercontent.com/docsz/AD_4nXfBE1xy3Is2fypbF8GZlzQdYYuq_LwLeISymNSVyy04blU2x83iiWxxjyD6E6GdVv6UlXA8xhTzaPqwjtFlg-hdEIk43Mt3iUHta4DbMVZobKo0XiHKvtmZYbf_bbmkNViS3bRKzw?key=fQVTa2iByxLrFWX-c99tXQ)
-
 ## **Airline Dashboard** 
 
-Dopo il login l’utente (Airline Company)  entra in un **dashboard completo** dove può:
+Dopo il login da parte di una compagnia aerea entra in un **dashboard completo** dove può:
 
 1. Visualizzare i dettagli della compagnia
 2. Controllare statistiche dei voli, passeggeri e revenue
 3. Gestire Voli (aggiungere / eliminare)
-4. Gestire aerei (aggiungere/eliminare)
+4. Gestire aerei (aggiungere / eliminare)
 5. Analizzare i dati di passeggeri e rotte più richieste 
 
 ![alt text](image-7.png)
@@ -97,7 +85,6 @@ Dopo il login l’utente (Airline Company)  entra in un **dashboard completo** 
 Un Operatore può aggiungere un nuovo aereo alla propria flotta indicandone il modello e la sua capacità.
 
 ![Schermata di aggiunta aereo](image-2.png)
-
 ## **Schermata di aggiunta di un volo**
 
 Un Operatore può aggiungere un nuovo volo specificando gli aeroporti di partenza e arrivo (una tratta), i relativi orari di partenza e arrivo.
@@ -106,7 +93,6 @@ Oltre che selezionare l'aereo che deve effettuare il volo e assegnare i costi al
 E' possibile inoltre aggiungere degli extra al volo.
 
 ![Schermata di aggiunta volo](image-1.png)
-
 ## **User Dashboard**
 
 Dopo il login l’utente (Passeggero) entra in un **dashboard completo** dove può:
@@ -115,7 +101,6 @@ Dopo il login l’utente (Passeggero) entra in un **dashboard completo** dove pu
 2. Visualizzare i biglietti prenotati con le relative informazioni e eliminarli. 
 
 ![alt text](image-11.png)
-
 ## **Schermata di ricerca**
 
 È la pagina principale del sito. Da qui è possibile ricercare i voli disponibili indicando la località di partenza e di arrivo. È inoltre possibile filtrare il risultato indicando una data minima (data odierna di default) e una data massima per la partenza del volo, richiedere solo voli diretti e infine indicare il range di prezzo desiderato.
@@ -131,13 +116,11 @@ Dopo il login l’utente (Passeggero) entra in un **dashboard completo** dove pu
 Esempio volo con scalo:
 
 ![Esempio volo con scalo](image-9.png)
-
 ## **Schermata di prenotazione**
 
 Se si ha eseguito l’accesso come passeggero, si possono prenotare dei biglietti per il volo selezionato che potranno essere visualizzati nella pagina profilo. È possibile selezionare il posto desiderato. Se contemporaneamente un altro utente dovesse comprare un biglietto, il posto risulterà occupato senza dover aggiornare la pagina:
 
 ![Schermata di prenotazione](image-10.png)
-
 # **Progettazione**
 
 ## **Progettazione concettuale e logica del DB**
@@ -148,11 +131,9 @@ Se si ha eseguito l’accesso come passeggero, si possono prenotare dei bigliett
 
 **Modello relazionale:** La conversione nel modello relazionale produce il seguente diagramma:
 
-<!-- ![schema oggetti](withour_airplane_id_on_flights.png) -->
 ![schema oggetti](dbv3.png)
 
 Nello schema ad oggetti abbiamo aggiunto  nella tabella Flight l'attributo "airline_id" per collegare ogni volo alla compagnia aerea specifica ( questo possiamo farlo poichè all'inserimento di un nuovo volo sappiamo quale compagnia aerea sta eseguendo l'operazione ) , in questo modo le query risultano notevolmente semplificate.
-
 ### **Query utilizzate**
 
 Le query principali sono : 
@@ -380,6 +361,7 @@ Questo vincolo garantisce che il numero di posti a sedere in classe business non
 ```SQL
 check (business_seats >= 0)
 ```
+
 ```airplanes.check_non_negative_first_class_seats```
 
 Questo vincolo garantisce che il numero di posti a sedere in classe first class non possa essere negativo.
@@ -403,6 +385,7 @@ Questo vincolo garantisce che ogni posto a sedere in un volo sia unico.
 ```SQL
 UNIQUE (seat_number, flight_id)
 ```
+
 ```tickets.check_valid_ticket_class```
 
 Questo vincolo garantisce che la classe del biglietto sia in un formato valido
@@ -410,6 +393,7 @@ Questo vincolo garantisce che la classe del biglietto sia in un formato valido
 ```SQL
 check (ticket_class IN ('economy', 'business', 'first'))
 ```
+
 ```tickets.check_non_negative_ticket_price```
 
 Questo vincolo garantisce che il prezzo totale del biglietto non possa essere negativo.
@@ -587,21 +571,19 @@ Abbiamo deciso di inserire un indice in ```Flights``` sulla colonna ```departure
 **Backend:** Per la progettazione del backend abbiamo utilizzato Python con le librerie :
 
 - Flask : utilizzato per implementare il flusso di esecuzione principale dell’applicazione ( le varie rotte )
-
 - Flask-sqlalchemy : utilizzato per implementare attraverso ORM il database relazionale per cui usiamo PostgreSql
-
 - Flask-login : utilizzato per l’implementazione del login e la gestione delle sessioni utente
-
 - flask_socketio : utilizzato per implementare l’aggiornamento in tempo reale dei posti a disposizione in un volo 
 
 **Frontend:** Per la progettazione del frontend abbiamo utilizzato :
 
 - Jinja : utilizzato come template system all’interno di html per interfacciarsi e generare pagine html utilizzando dati forniti dal backend python
-
 - Javascript : utilizzato per migliorare l’esperienza utente e per il collegamento ai socket per l’aggiornamento in tempo reale dei posti a disposizione all’interno di un volo
-
 - Bootstrap : utilizzato per la veste grafica del sito
-  
+
+### Implementazione Login
+Per la distinzione tra utenti che accedono come compagnia aerea e utenti passeggeri abbiamo deciso di utilizzare una variabile booleana mantenuta all'interno della tabella `Users`.
+
 ### Implementazione Aggiornamenti posti in tempo reale
 
 Per implementare l’aggiornamento in tempo reale dei posti a disposizione in un volo, abbiamo utilizzato Flask-SocketIO e la libreria Javascript Socket.IO 
@@ -611,8 +593,6 @@ Abbiamo implementato un trigger che invia un notifica ```pg_notify``` quando ci 
 Il server crea delle 'room' ognuna relativa ad ogni volo, in cui verrano pushati i cambiamenti effettuati ai posti 
 
 Il frontend si connette a questa room utilizzando il flight_id per ricevere aggiornamenti in tempo reale sui posti disponibili e modificare di conseguenza la pagina
-
-
 # **Contributo al progetto**
 La realizzazione del progetto è avvenuta in maniera unitaria lavorando in gruppo, anche grazie alla funzionalità "Live Share" di visual studio code.
 
