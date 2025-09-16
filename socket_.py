@@ -9,22 +9,22 @@ from socket_io_init import socketio
 from flask import request
 
 #! Connessione al database da usare docker 
-# conn = psycopg2.connect("postgresql://postgres:1234@localhost:5432/Project-DB-test")
+conn = psycopg2.connect("postgresql://postgres:1234@localhost:5432/Project-DB-test")
 # conn = psycopg2.connect("postgresql://postgres:1234@db:5432/Project-DB-test")
-# conn.autocommit = True
+conn.autocommit = True
 
-def get_db_connection(delay=1):
-    while True:
-        try:
-            # connessione docker
-            conn = psycopg2.connect("postgresql://postgres:1234@db:5432/Project-DB-test")
-            conn.autocommit = True
-            return conn
-        except psycopg2.OperationalError as e:
-            print(f"Postgres not ready, retrying in {delay}s...")
-            time.sleep(delay)
+# def get_db_connection(delay=1):
+#     while True:
+#         try:
+#             # connessione docker
+#             conn = psycopg2.connect("postgresql://postgres:1234@db:5432/Project-DB-test")
+#             conn.autocommit = True
+#             return conn
+#         except psycopg2.OperationalError as e:
+#             print(f"Postgres not ready, retrying in {delay}s...")
+#             time.sleep(delay)
 
-conn = get_db_connection()
+# conn = get_db_connection()
 
 active_rooms = {}
 rooms_lock = threading.Lock()

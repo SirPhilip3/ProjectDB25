@@ -268,9 +268,9 @@ def check_db_connection():
         return False
 
 if __name__ == '__main__':
-    while not check_db_connection():
-        print("cecking connection")
-        time.sleep(1)
+    # while not check_db_connection():
+    #     print("cecking connection")
+    #     time.sleep(1)
     
     from populate import populate_db_with_demo_data
     populate_db_with_demo_data()

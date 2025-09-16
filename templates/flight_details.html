@@ -247,8 +247,8 @@
     };
 
     // connessione socket.io
-    const socket = io.connect('http://' + document.domain + ':' + location.port);
-
+    // const socket = io.connect('http://' + document.domain + ':' + location.port);
+    const socket = io.connect('http://localhost:5000');
     // Join room quando l'utente visita la pagina del volo
     socket.emit('join_flight', {flight_id: '{{ flight_id }}'});
 

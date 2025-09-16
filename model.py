@@ -134,7 +134,7 @@ class Ticket(db.Model):
     
     __table_args__ = (
         UniqueConstraint('seat_number', 'flight_id', name='unique_seat_per_flight'),
-        CheckConstraint("ticket_class IN ('economy', 'business', 'first')", name='check_valid_ticket_class'),
+        CheckConstraint("ticket_class IN ('economy', 'business', 'first_class')", name='check_valid_ticket_class'),
         CheckConstraint('price >= 0', name='check_non_negative_ticket_price'),
     )
 

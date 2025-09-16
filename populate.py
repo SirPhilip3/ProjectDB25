@@ -153,8 +153,76 @@ def populate_db_with_demo_data():
                         {"name": "Beauty Case", "price": 20.0}
                     ]
                 )
+        
+        flight4 = Flight(
+            departure_time=datetime(2025, 10, 1, 10, 30),
+            arrival_time=datetime(2025, 10, 1, 14, 10),
+            departure_airport="Roma",
+            destination_airport="Parigi",
+            economy_price=85.0,
+            business_price=260.0,
+            first_class_price=320.0,
+            airline=airline2,
+            airplane=airplane3,
+            extras=[
+                {"name": "Bagaglio aggiuntivo", "price": 28.0},
+                {"name": "Imbarco prioritario", "price": 12.0}
+            ]
+        )
 
-        db.session.add_all([flight1, flight2, flight3])
+        # Milano-Londra per Fly Safe (compagnia 2, aereo 3)
+        flight5 = Flight(
+            departure_time=datetime(2025, 11, 10, 9, 30),
+            arrival_time=datetime(2025, 11, 10, 10, 50),
+            departure_airport="Milano",
+            destination_airport="Londra",
+            economy_price=50.0,
+            business_price=75.0,
+            first_class_price=110.0,
+            airline=airline2,
+            airplane=airplane3,
+            extras=[
+                {"name": "Bagaglio aggiuntivo", "price": 32.0},
+                {"name": "Imbarco prioritario", "price": 14.0}
+            ]
+        )
+
+        # Parigi-Tokyo per Air Italy (compagnia 1, aereo 2)
+        flight6 = Flight(
+            departure_time=datetime(2025, 10, 15, 18, 0),
+            arrival_time=datetime(2025, 10, 16, 3, 40),
+            departure_airport="Parigi",
+            destination_airport="Tokyo",
+            economy_price=185.0,
+            business_price=310.0,
+            first_class_price=410.0,
+            airline=airline1,
+            airplane=airplane2,
+            extras=[
+                {"name": "Bagaglio aggiuntivo", "price": 30.0},
+                {"name": "Imbarco prioritario", "price": 15.0},
+                {"name": "Beauty Case", "price": 22.0}
+            ]
+        )
+
+        flight7 = Flight(
+            departure_time=datetime(2025, 12, 20, 15, 0),
+            arrival_time=datetime(2025, 12, 20, 17, 30),
+            departure_airport="Roma",
+            destination_airport="Tokyo",
+            economy_price=150.0,
+            business_price=400.0,
+            first_class_price=600.0,
+            airline=airline1,
+            airplane=airplane1,
+            extras=[
+                {"name": "Bagaglio aggiuntivo", "price": 40.0},
+                {"name": "Imbarco prioritario", "price": 20.0},
+                {"name": "Pasti speciali", "price": 25.0}
+            ]
+        )
+
+        db.session.add_all([flight1, flight2, flight3, flight4, flight5, flight6, flight7])
         db.session.commit()
         # ====== CREAZIONE TICKETS ======
         # Passenger 1 Flight 1
@@ -186,7 +254,7 @@ def populate_db_with_demo_data():
         # Passenger 2 Flight 2
         ticket4 = Ticket(
             seat_number="F2",
-            ticket_class="first",
+            ticket_class="first_class",
             price=115.0,
             selected_extras=[{"name": "Imbarco prioritario", "price": 15.0}],
             passenger_id=passenger2.id,
@@ -194,7 +262,7 @@ def populate_db_with_demo_data():
         )
         ticket5 = Ticket(
             seat_number="F3",
-            ticket_class="first",
+            ticket_class="first_class",
             price=115.0,
             selected_extras=[{"name": "Imbarco prioritario", "price": 15.0}],
             passenger_id=passenger2.id,
@@ -202,7 +270,7 @@ def populate_db_with_demo_data():
         )
         ticket6 = Ticket(
             seat_number="F4",
-            ticket_class="first",
+            ticket_class="first_class",
             price=115.0,
             selected_extras=[{"name": "Imbarco prioritario", "price": 15.0}],
             passenger_id=passenger2.id,
@@ -212,7 +280,7 @@ def populate_db_with_demo_data():
         # Passenger 3 Flight 3
         ticket7 = Ticket(
             seat_number="F7",
-            ticket_class="first",
+            ticket_class="first_class",
             price=420.0,
             selected_extras=[{"name": "Beauty Case", "price": 20.0}],
             passenger_id=passenger3.id,
